@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Dialog | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Modal and non-modal dialogs">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m17">
+<header class="hero"><div class="in"><div class="kicker">Part 4 &middot; Module 17</div><h1>Dialog</h1><p>Modal and non-modal dialogs</p></div></header>
+<main>
+<p>The <code>&lt;dialog&gt;</code> element represents any dialog box or pop-up panel. A <b>modal</b> dialog interrupts the user and demands attention: only the dialog can be used until it is dismissed. A <b>non-modal</b> dialog lets the user keep working on the page behind it. Pop-ups are valid, but each one forces the user to stop what they are doing, so use them with care.</p>
+<p><code>&lt;dialog&gt;</code> brings its own semantics, keyboard behaviour and the <code>HTMLDialogElement</code> interface, so you no longer need a library or a pile of ARIA to build one.</p>
+
+<h2>1. Modal or non-modal: which method opens it</h2>
+<table class="t"><tr><th></th><th><code>showModal()</code></th><th><code>show()</code></th></tr>
+<tr><td>Kind</td><td>Modal</td><td>Non-modal</td></tr>
+<tr><td>Rest of the page</td><td>Made <b>inert</b> (not clickable, focusable or selectable), without you setting <code>inert</code></td><td>Stays fully interactive</td></tr>
+<tr><td><code>::backdrop</code></td><td>Yes (dimmed layer)</td><td>No</td></tr>
+<tr><td>Layering</td><td>Placed in the <b>top layer</b>: no <code>z-index</code> fights</td><td>Normal stacking, so <code>z-index</code> and positioning apply</td></tr>
+<tr><td>Escape key closes it</td><td>Yes</td><td><b>No</b></td></tr>
+<tr><td>Focus</td><td>Moves into the dialog and is trapped there</td><td>Moves into the dialog, but Tab can leave it</td></tr></table>
+<pre><code>&lt;button id="open"&gt;Open modal dialog&lt;/button&gt;
+&lt;dialog id="dlg" aria-labelledby="dlgTitle"&gt;
+  &lt;h2 id="dlgTitle"&gt;Delete this file?&lt;/h2&gt;
+  &lt;form method="dialog"&gt;
+    &lt;button value="cancel" formnovalidate autofocus&gt;Cancel&lt;/button&gt;
+    &lt;button value="delete"&gt;Delete&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/dialog&gt;
+&lt;script&gt;
+  document.getElementById('open').onclick = () =&gt; dlg.showModal(); // or dlg.show()
+&lt;/script&gt;</code></pre>
+<ul>
+<li>The three methods: <code>dialog.show()</code> (non-modal), <code>dialog.showModal()</code> (modal), <code>dialog.close()</code>.</li>
+<li>Writing the <code>open</code> attribute in HTML shows the dialog as <b>non-modal</b>, with no backdrop and nothing inert. The source's phrase "modal-less" means non-modal.</li>
+<li><code>dialog.open</code> is a boolean that is true whenever the dialog is shown, modal or not; it does not tell you which. Do not toggle the <code>open</code> attribute by hand to open a modal; call <code>showModal()</code>.</li>
+<li>Calling <code>showModal()</code> on a dialog that is already open non-modally throws an <code>InvalidStateError</code>. Close it first.</li>
+<li>Avoid opening a dialog without a user action. If you must, make sure focus returns sensibly when it closes.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">BIET: what showModal() gives you</b><b>B</b>ears <b>I</b>nvite <b>E</b>lk <b>T</b>ea = <b>B</b>ackdrop, <b>I</b>nert page, <b>E</b>scape closes, <b>T</b>op layer. <code>show()</code> gives none of the four.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Closed dialog that will not stay closed</b><code>dialog { display: flex }</code> overrides the browser's <code>dialog:not([open]) { display: none }</code>, so the "closed" dialog sits on the page. Style the open state only: <code>dialog[open] { display: flex }</code>.</aside>
+
+<h2>2. Focus, inert and autofocus</h2>
+<ul>
+<li>When a dialog opens, focus moves to its <b>first focusable element</b>. An element with <code>autofocus</code> inside the dialog takes it instead. This is the one place where <code>autofocus</code> is recommended (see the Focus module): put it on the safe choice, like "Cancel" on a delete prompt.</li>
+<li><code>autofocus</code> inside a closed dialog does nothing on page load. It applies each time the dialog is opened. (The lab below leaves it off: browsers block <code>autofocus</code> inside sandboxed frames like the editor, and its first control, Cancel, gets focus anyway.)</li>
+<li>With a modal, Tab cycles through the dialog only: everything outside is inert, as if <code>pointer-events: none</code> were set. Even the button that opened it stops reacting.</li>
+<li>When any dialog closes, focus returns to the element that had it before. If you close a non-modal dialog from a button <i>outside</i> it, that may be somewhere odd.</li>
+<li>The global <code>inert</code> attribute does the same job for any region; <code>showModal()</code> applies that deactivation for you without writing the attribute.</li>
+<li><code>autofocus</code> moves the Tab starting point: the controls before it are still reachable with Shift+Tab. They are not "skipped" for good.</li>
+</ul>
+
+<h2>3. Closing a dialog</h2>
+<ul>
+<li><b>Escape</b>: closes a modal (and fires <code>cancel</code> first). It does not close a non-modal dialog, so always provide a visible close button. The spec does not require one, but treat it as required.</li>
+<li><b>A form with <code>method="dialog"</code></b> (or a button with <code>formmethod="dialog"</code>): the dialog closes with <b>no JavaScript</b>. Validation still runs, unless <code>novalidate</code>/<code>formnovalidate</code>. The data is neither sent nor cleared.</li>
+<li><b><code>dialog.close()</code></b>: closes it from script. It may take a value: <code>dialog.close("saved")</code>.</li>
+<li>Newer browsers add <code>dialog.requestClose()</code> and a <code>closedby</code> attribute (<code>any</code> for click-outside, <code>closerequest</code>, <code>none</code>). Treat these as progressive enhancement.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">EFC: three ways to close</b><b>E</b>lephants <b>F</b>ry <b>C</b>heese = <b>E</b>scape key, <b>F</b>orm <code>method="dialog"</code>, <code>close()</code> call.</aside>
+
+<h2>4. returnValue and events</h2>
+<ul>
+<li><code>dialog.returnValue</code> is a string describing why the dialog closed. Submitting a <code>method="dialog"</code> form sets it to the <b><code>value</code></b> of the submit button that was used (the source says <code>name</code>: wrong). <code>&lt;button value="toasty"&gt;</code> gives <code>"toasty"</code>; a button without <code>value</code> gives <code>""</code>. <code>close("x")</code> sets it too.</li>
+<li>Events: <code>cancel</code> (Escape; cancelable) and <code>close</code> (after any close). Read <code>returnValue</code> inside <code>close</code>.</li>
+<li>The <code>close</code> event does not bubble; attach it to the <code>&lt;dialog&gt;</code> itself.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">ORCC: dialog members</b><b>O</b>tters <b>R</b>eally <b>C</b>huck <b>C</b>arrots = <b>O</b>pen (property), <b>R</b>eturnValue, <b>C</b>ancel event, <b>C</b>lose event.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">returnValue is the name</b><code>&lt;button name="toasty"&gt;</code> does not set <code>returnValue</code>. The value comes from the button's <code>value</code>. With no <code>value</code> you get an empty string.</aside>
+
+<h2>5. Styling and ARIA</h2>
+<ul>
+<li>The backdrop is <code>dialog::backdrop</code> (<code>::backdrop</code> is a pseudo-element, not <code>::background</code>). It only exists for modal dialogs, and also matches the backdrop of fullscreen elements. Example: <code>dialog::backdrop { background: rgb(0 0 0 / .6); }</code>.</li>
+<li>Browsers apply default styles. Chrome, Firefox and Edge use <code>color: CanvasText; background: Canvas</code>; Safari uses black on white. Colour is set on the dialog itself, so it is <b>not</b> inherited from <code>body</code> or <code>:root</code>, and <code>background-color</code> is not inherited either. A dark page with a light-text <code>body</code> can give you invisible dialog text.</li>
+<li>The implicit role is <code>dialog</code>. For a confirmation that needs a response (a destructive action, a session warning) use <code>role="alertdialog"</code>.</li>
+<li>Give it an accessible name: <code>aria-labelledby</code> pointing at visible text, or <code>aria-label</code>. You do not need <code>aria-modal</code> when using <code>showModal()</code>.</li>
+<li>Do <b>not</b> add <code>tabindex</code> to a <code>&lt;dialog&gt;</code>: it is not interactive and does not take focus; its contents do.</li>
+<li>A page behind a modal can still scroll in some browsers. <code>body:has(dialog[open]) { overflow: hidden }</code> locks it.</li>
+</ul>
+<textarea class="try-src" data-title="Dialog lab: modal, non-modal, returnValue" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px} button{padding:6px 12px;font:inherit;margin:3px}
+ dialog{border:2px solid #A51C30;border-radius:10px;padding:0;max-width:300px}
+ .in{padding:16px}
+ dialog::backdrop{background:rgb(40 0 10 / .55)}
+ #out{background:#eee;padding:6px;font:13px monospace;min-height:3em;white-space:pre-wrap}
+&lt;/style&gt;
+&lt;p&gt;&lt;button id="m"&gt;showModal()&lt;/button&gt; &lt;button id="n"&gt;show() (non-modal)&lt;/button&gt; &lt;button id="x"&gt;Try the page button&lt;/button&gt;&lt;/p&gt;
+&lt;dialog id="d" aria-labelledby="t"&gt;&lt;div class="in"&gt;
+  &lt;h2 id="t" style="margin-top:0"&gt;Delete this file?&lt;/h2&gt;
+  &lt;p&gt;Press Escape, click a button, or click the backdrop.&lt;/p&gt;
+  &lt;form method="dialog"&gt;
+    &lt;!-- no autofocus here: browsers block it inside this sandboxed editor frame. Cancel is the first control, so it still gets focus. On a real page, add autofocus to the safe button. --&gt;
+    &lt;button value="cancel" formnovalidate&gt;Cancel&lt;/button&gt;
+    &lt;button value="delete"&gt;Delete&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;&lt;/dialog&gt;
+&lt;div id="out"&gt;events appear here&lt;/div&gt;
+&lt;script&gt;
+ var d=document.getElementById('d'), out=document.getElementById('out');
+ function log(s){out.textContent=s+'\n'+out.textContent;}
+ document.getElementById('m').onclick=function(){ if(d.open) d.close(); d.showModal(); log('showModal: open='+d.open); };
+ document.getElementById('n').onclick=function(){ if(d.open) d.close(); d.show(); log('show: open='+d.open+' (no backdrop, Escape will not close)'); };
+ document.getElementById('x').onclick=function(){ log('page button clicked (works only if the dialog is not modal)'); };
+ d.addEventListener('cancel',function(){log('cancel event (Escape)');});
+ d.addEventListener('close',function(){log('close event, returnValue="'+d.returnValue+'"');});
+ d.addEventListener('click',function(e){ if(e.target===d){ d.close('backdrop'); } }); /* click on the backdrop = click on the dialog itself */
+ /* This editor's sandbox blocks form submission, so method="dialog" cannot fire here. We emulate it. On a real page the form alone closes the dialog with no script. */
+ d.querySelectorAll('form button').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();d.close(b.value);});});
+&lt;/script&gt;</textarea>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Click outside to close</b>A click on a modal's backdrop targets the <code>&lt;dialog&gt;</code> itself. <code>dialog.addEventListener('click', e =&gt; { if (e.target === dialog) dialog.close() })</code> gives light dismiss. Keep padding on an inner wrapper, not the dialog, or clicks on the padding will count as outside clicks.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Read the result in a one-time handler</b><code>dialog.addEventListener('close', () =&gt; handle(dialog.returnValue), { once: true })</code> right before <code>showModal()</code> turns a dialog into "await the choice" logic with no global state.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Dialog without a way out</b>A non-modal dialog does not close on Escape, and a custom modal that cancels <code>cancel</code> traps keyboard users. Always provide a focusable close or Cancel button.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Dialog for everything</b>A modal for a cookie banner, a tooltip or a menu is overkill. Use a non-modal dialog, the Popover API (<code>popover</code> attribute) or an inline panel for content that should not block the page.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> "modal-less" in the source means non-modal. The source says <code>returnValue</code> is set to the button's "name": it is the button's <code>value</code>. The source says an autofocus "skips" earlier elements; the Tab starting point moves and Shift+Tab still reaches them (same fix as the Focus module). "Opening with the <code>open</code> attribute" is non-modal and gives no backdrop or inertness. <code>method="dialog"</code> consistency with the Forms module kept. Added: <code>display</code> override fail, top layer, <code>cancel</code>/<code>close</code> events, <code>close(value)</code>, <code>requestClose</code>/<code>closedby</code>, Escape not closing non-modals, <code>InvalidStateError</code>, UA colour defaults. Removed: CodePen iframes, quiz, Focus lesson reference text.</div>
+
+<div class="practice" data-id="m17"></div>
+<div class="quiz" data-id="m17"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

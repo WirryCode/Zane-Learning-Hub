@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Focus | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="tabindex, autofocus, keyboard flow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m13">
+<header class="hero"><div class="in"><div class="kicker">Part 3 &middot; Module 13</div><h1>Focus</h1><p>tabindex, autofocus, keyboard flow</p></div></header>
+<main>
+<p><b>Focus</b> is the element that currently receives keyboard input. Interactive elements (links with <code>href</code>, buttons, form controls, <code>&lt;summary&gt;</code>, editable content, iframes) are <b>focusable</b> and <b>tabbable</b> by default: they join the sequential focus navigation order, which follows the source order. Everything else is <i>inert</i>: not interactive. HTML attributes can change both groups.</p>
+<p>Terms to keep apart: <b>focusable</b> = can receive focus (click, script, or Tab). <b>Tabbable</b> = reachable by pressing Tab. Every tabbable element is focusable; not every focusable one is tabbable.</p>
+
+<h2>1. Always show where focus is</h2>
+<ul>
+<li>Keyboard users need a visible indicator. Style <code>:focus-visible</code> (shown for keyboard use), <code>:focus</code> and, for a parent whose child is focused, <code>:focus-within</code>.</li>
+<li>Never write <code>outline: none</code> without a replacement of equal visibility.</li>
+<li>Test by tabbing through the page; Shift+Tab goes backwards.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">SPOT: focus checklist</b><b>S</b>eals <b>P</b>refer <b>O</b>ily <b>T</b>una = <b>S</b>how focus, <b>P</b>reserve the outline, keep <b>O</b>rder logical, <b>T</b>est with the keyboard.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">outline: none</b>Removing the focus ring "because it is ugly" leaves keyboard users lost. If you restyle it, make the new indicator at least as visible (<code>outline: 3px solid; outline-offset: 2px</code>).</aside>
+
+<h2>2. Do not scramble the order</h2>
+<p>Default focus order = visual order = source order. Two things break it:</p>
+<ul>
+<li><b>HTML</b>: positive <code>tabindex</code> values.</li>
+<li><b>CSS</b>: <code>flex-direction: row-reverse</code>, the <code>order</code> property, grid placement, absolute positioning, transforms and multi-column can move things on screen while the tab sequence stays in the code order.</li>
+</ul>
+<p>The result is focus that jumps around the screen. Keep a logical order at every viewport size, and if the visual order must change, change the source order instead.</p>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Reordering with CSS only</b>A <code>flex</code> layout reversed with <code>order: -1</code> looks perfect to the mouse and is chaos to Tab. WCAG calls this a failure of "Focus Order" and "Meaningful Sequence".</aside>
+
+<h2>3. Make inert elements focusable</h2>
+<h3>tabindex</h3>
+<table class="t"><tr><th>Value</th><th>Focusable by script/click</th><th>In Tab order</th><th>Use</th></tr>
+<tr><td><code>-1</code></td><td>Yes</td><td>No</td><td>Programmatic focus: modals, skip-link targets, error summaries</td></tr>
+<tr><td><code>0</code></td><td>Yes</td><td>Yes, in source order</td><td>Custom widgets (with a matching <code>role</code> and key handling)</td></tr>
+<tr><td><code>1</code> or more</td><td>Yes</td><td>Yes, but first, lowest number to highest</td><td>Almost never: causes focus chaos</td></tr></table>
+<ul>
+<li><code>tabindex="0"</code> on something already focusable (button, link) is unnecessary.</li>
+<li><code>tabindex="-1"</code> on an interactive element removes it from the Tab order but does <b>not</b> disable it: mouse users can still focus and click it.</li>
+<li><code>el.focus()</code> focuses an element and the browser scrolls it into view. Use <code>document.activeElement</code> to read which element has focus. Avoid <code>focus({preventScroll:true})</code> unless the element is already visible.</li>
+<li>A custom element used as a control needs the whole contract: <code>tabindex="0"</code>, a <code>role</code>, and key handling for Enter and Space. Prefer the real element.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">TDI: three ways to take things out of Tab</b><b>T</b>igers <b>D</b>islike <b>I</b>ce = negative <b>T</b>abindex, <b>D</b>isabled, <b>I</b>nert. They look alike but are <b>not</b> interchangeable.</aside>
+<h3>contenteditable</h3>
+<p><code>contenteditable="true"</code> makes the element editable, focusable and tabbable (similar to <code>tabindex="0"</code>). A <b>nested</b> editable element is focusable but not tabbable until you add <code>tabindex="0"</code>.</p>
+<h3>autofocus</h3>
+<ul>
+<li><code>autofocus</code> is a global boolean. On page load, the first focusable element with it gets focus, and the page scrolls to it. It does not make an inert element interactive.</li>
+<li>Problems: screen reader users may miss the instructions or label above it; it moves the starting point of Tab so earlier content is skipped. <b>Avoid it on ordinary pages.</b></li>
+<li><b>Exception</b>: inside a <code>&lt;dialog&gt;</code>. Opening a dialog focuses its first focusable element, and <code>autofocus</code> lets you choose a different one (such as the safe "Cancel" button of a destructive prompt).</li>
+</ul>
+<pre><code>&lt;dialog open&gt;
+  &lt;form method="dialog"&gt;
+    &lt;button type="submit" autofocus&gt;Close&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/dialog&gt;</code></pre>
+
+<h2>4. Make interactive elements inert</h2>
+<table class="t"><tr><th></th><th><code>tabindex="-1"</code></th><th><code>disabled</code></th><th><code>inert</code></th></tr>
+<tr><td>Where</td><td>Any focusable element</td><td>Form controls, <code>&lt;fieldset&gt;</code>, <code>&lt;optgroup&gt;</code>, <code>&lt;option&gt;</code>, <code>&lt;button&gt;</code>, form-associated custom elements. <b>Not</b> global</td><td>Any element (global boolean)</td></tr>
+<tr><td>Removes from Tab</td><td>Yes</td><td>Yes</td><td>Yes (and descendants)</td></tr>
+<tr><td>Can still be clicked/focused</td><td>Yes</td><td>No: no focus, no click events</td><td>No: nothing inside is clickable, focusable or selectable</td></tr>
+<tr><td>Submitted with form</td><td>Yes</td><td><b>No</b></td><td>Yes, if a normal control</td></tr>
+<tr><td>Accessibility tree</td><td>Unchanged</td><td>Exposed as disabled</td><td>Removed</td></tr>
+<tr><td>Default styling</td><td>None</td><td>Greyed by the browser, <code>:disabled</code></td><td>None, no pseudo-class (<code>[inert]</code> selector works)</td></tr></table>
+<ul>
+<li><code>disabled</code> is a boolean: you cannot set it to false. Remove it (<code>removeAttribute</code>) or set <code>el.disabled = false</code>. On a <code>&lt;fieldset&gt;</code> it disables all descendants except those in the first <code>&lt;legend&gt;</code>.</li>
+<li><code>inert</code> is meant for sections: off-screen drawers, background content behind a modal, a form while it is submitting. A modal <code>&lt;dialog&gt;</code> opened with <code>showModal()</code> makes the rest of the page inert for you.</li>
+<li>Make inertness <b>visible</b> with CSS (dim it). Never leave the focus on, or move it to, something hidden or inert.</li>
+<li>Content that is hidden but appears when focused (a skip link) must <b>not</b> be inert.</li>
+</ul>
+<textarea class="try-src" data-title="Focus lab: tab order, tabindex and inert" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px}
+ button,a,div[tabindex],input{margin:3px;padding:6px 10px;font:inherit}
+ :focus-visible{outline:3px solid #A51C30;outline-offset:2px}
+ [inert]{opacity:.45}
+ #log{background:#eee;padding:6px;min-height:2em;font:13px monospace}
+&lt;/style&gt;
+&lt;p&gt;Press Tab and Shift+Tab. Watch the log.&lt;/p&gt;
+&lt;div&gt;
+  &lt;button&gt;1. button&lt;/button&gt;
+  &lt;a href="#x"&gt;2. link&lt;/a&gt;
+  &lt;div tabindex="0" role="button"&gt;3. div tabindex=0&lt;/div&gt;
+  &lt;div tabindex="-1" role="button"&gt;4. div tabindex=-1 (click me, no Tab)&lt;/div&gt;
+  &lt;button disabled&gt;5. disabled&lt;/button&gt;
+  &lt;input placeholder="6. input"&gt;
+&lt;/div&gt;
+&lt;div id="box"&gt;&lt;button&gt;7. inside the box&lt;/button&gt; &lt;a href="#y"&gt;8. link in the box&lt;/a&gt;&lt;/div&gt;
+&lt;p&gt;&lt;button id="t" type="button"&gt;Toggle inert on the box&lt;/button&gt;&lt;/p&gt;
+&lt;div id="log"&gt;focus log&lt;/div&gt;
+&lt;script&gt;
+ var log = document.getElementById('log');
+ document.addEventListener('focusin', function(e){
+   log.textContent = 'focused: ' + e.target.textContent.trim().slice(0,30) + ' &lt;' + e.target.tagName.toLowerCase() + '&gt;';
+ });
+ document.getElementById('t').onclick = function(){ document.getElementById('box').toggleAttribute('inert'); };
+&lt;/script&gt;</textarea>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Roving tabindex</b>For a toolbar or tab list, keep one item at <code>tabindex="0"</code> and the rest at <code>-1</code>; move the <code>0</code> with the arrow keys. The group is one Tab stop and arrows move within it.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Focus the heading after a route change</b>After swapping content in a single-page app, give the new <code>&lt;h1&gt;</code> <code>tabindex="-1"</code> and call <code>.focus()</code> so screen reader and keyboard users land at the top of the new view.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Focus into the void</b>Showing a panel with <code>visibility:hidden</code>/off-screen positioning but leaving its links tabbable lets focus vanish into invisible content. Make off-screen content <code>inert</code> (or <code>hidden</code>).</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Using disabled for everything</b><code>disabled</code> removes the control from the form data and from view of assistive tech users who might wonder why. If a field is just not editable but should be sent, use <code>readonly</code>. If the control should stay tabbable, explain why in text instead.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes call non-interactive elements "inert", which clashes with the global <code>inert</code> attribute: here "inert" means "not interactive" and <code>inert</code> is the attribute. They say <code>autofocus</code> should be skipped "because earlier elements are skipped": the tab starting point moves, so earlier content is reached by Shift+Tab. "Avoid <code>preventScroll</code>" softened (it is fine when the element is already visible). <code>disabled</code> also covers <code>&lt;button&gt;</code>, <code>&lt;option&gt;</code>, <code>&lt;optgroup&gt;</code> and form-associated custom elements; <code>inert</code> also blocks text selection. Removed: web.dev share-action and navigation-drawer custom element code, CodePen iframes, Learn CSS plugs, the quiz.</div>
+
+<div class="practice" data-id="m13"></div>
+<div class="quiz" data-id="m13"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

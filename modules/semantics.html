@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Semantics | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Meaningful markup and the accessibility tree">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m04">
+<header class="hero"><div class="in"><div class="kicker">Part 2 &middot; Module 04</div><h1>Semantics</h1><p>Meaningful markup and the accessibility tree</p></div></header>
+<main>
+<p><b>Semantic</b> means "relating to meaning". Semantic HTML picks each element for what the content <i>is</i>, not for how it looks. Looks are CSS's job. Meaning is for browsers, search engines, screen readers and the next developer.</p>
+
+<h2>1. Div soup vs meaningful markup</h2>
+<p>Both snippets can look identical. Only the second tells a machine (or a person who cannot read the language) what each part is.</p>
+<pre><code>&lt;!-- Div soup: boxes and text, no meaning --&gt;
+&lt;div&gt;&lt;span&gt;Machine Learning Workshop&lt;/span&gt;
+  &lt;div&gt;&lt;a href="/"&gt;Home&lt;/a&gt; &lt;a href="/about"&gt;About&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;div&gt;Enrolment is open&lt;/div&gt;
+  &lt;div&gt;&lt;div&gt;Why enrol&lt;/div&gt;&lt;div&gt;Because machines.&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;span&gt;&amp;copy; 2026&lt;/span&gt;&lt;/div&gt;
+
+&lt;!-- Semantic: structure is obvious at a glance --&gt;
+&lt;header&gt;&lt;h1&gt;Machine Learning Workshop&lt;/h1&gt;
+  &lt;nav&gt;&lt;a href="/"&gt;Home&lt;/a&gt; &lt;a href="/about"&gt;About&lt;/a&gt;&lt;/nav&gt;&lt;/header&gt;
+&lt;main&gt;&lt;h2&gt;Enrolment is open&lt;/h2&gt;
+  &lt;section&gt;&lt;h3&gt;Why enrol&lt;/h3&gt;&lt;p&gt;Because machines.&lt;/p&gt;&lt;/section&gt;&lt;/main&gt;
+&lt;footer&gt;&lt;p&gt;&amp;copy; 2026&lt;/p&gt;&lt;/footer&gt;</code></pre>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">MOLE: the semantic mindset</b><b>M</b>oles <b>O</b>nly <b>L</b>ike <b>E</b>arthworms = <b>M</b>eaning <b>O</b>ver <b>L</b>ooks, <b>E</b>very time. Choose the tag for what the content is; style it with CSS.</aside>
+
+<h2>2. Three trees the browser builds</h2>
+<table class="t"><tr><th>Tree</th><th>Built from</th><th>Used by</th></tr>
+<tr><td>DOM</td><td>HTML nodes (elements, attributes, text)</td><td>JavaScript, selectors</td></tr>
+<tr><td>CSSOM</td><td>Stylesheets</td><td>Rendering</td></tr>
+<tr><td>Accessibility tree (AOM)</td><td>DOM + computed styles + roles</td><td>Screen readers, voice assistants</td></tr></table>
+<p>Each node in the accessibility tree exposes a <b>name</b>, a <b>role</b> and a <b>state or value</b>. Div soup produces a tree of bare text and links. Semantic markup produces named landmarks, headings and lists that users can jump between by keyboard. HTML is accessible by default; your job is to not break that.</p>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">See the accessibility tree</b>Chrome: DevTools, Elements, Accessibility tab. Firefox: the Accessibility panel. Click a node to see its role, name and state. No landmarks showing? Your page is div soup.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes call the AOM "a semantic version of the DOM". More exactly, it is the accessibility tree browsers derive from the DOM <i>and</i> computed style, so <code>display:none</code> removes nodes from it. Also, the notes' Firefox shot labels a <code>&lt;header&gt;</code> nested in <code>&lt;main&gt;</code> as a "section": it is <b>not</b> a landmark (ARIA calls it generic).</div>
+
+<h2>3. Implicit roles</h2>
+<table class="t"><tr><th>Element</th><th>Implicit role</th><th>Notes</th></tr>
+<tr><td><code>&lt;header&gt;</code> (top level)</td><td>banner</td><td>Nested inside article/section: no landmark</td></tr>
+<tr><td><code>&lt;footer&gt;</code> (top level)</td><td>contentinfo</td><td>Nested: no landmark</td></tr>
+<tr><td><code>&lt;nav&gt;</code></td><td>navigation</td><td>Label if more than one</td></tr>
+<tr><td><code>&lt;main&gt;</code></td><td>main</td><td>One visible per page</td></tr>
+<tr><td><code>&lt;aside&gt;</code></td><td>complementary</td><td></td></tr>
+<tr><td><code>&lt;section&gt;</code></td><td>region</td><td>Only when it has an accessible name</td></tr>
+<tr><td><code>&lt;search&gt;</code></td><td>search</td><td>Wraps a search form (newer element)</td></tr>
+<tr><td><code>&lt;button&gt;</code>, <code>&lt;a href&gt;</code></td><td>button, link</td><td>Interactive: focusable, with default keys</td></tr></table>
+<p>Roles matter because they tell a user what an element is <i>and</i> how to interact with it. Landmarks make large pages keyboard-navigable.</p>
+
+<h2>4. The role attribute (and why to avoid it)</h2>
+<p><code>role</code> is a global attribute defined by the <b>ARIA</b> spec, not the HTML spec. It changes what assistive technology announces. It does <b>not</b> change appearance, focus or behaviour.</p>
+<textarea class="try-src" data-title="Fake button vs real button" hidden>&lt;style&gt;body{font-family:sans-serif} button,[role=button]{padding:6px 12px;font-size:1rem}&lt;/style&gt;
+&lt;p&gt;Press Tab, then Enter or Space on each one:&lt;/p&gt;
+&lt;div role="button"&gt;Fake: div + role&lt;/div&gt;
+&lt;br&gt;
+&lt;button&gt;Real: button&lt;/button&gt;
+&lt;pre id="out"&gt;&lt;/pre&gt;
+&lt;script&gt;
+var els = document.querySelectorAll('[role=button],button');
+els.forEach(function (el) {
+  el.addEventListener('click', function () { alert(el.textContent + ' clicked'); });
+});
+out.textContent = Array.from(els).map(function (el) {
+  return el.tagName + ' tabIndex = ' + el.tabIndex;
+}).join('\n');
+&lt;/script&gt;</textarea>
+<p>The div has <code>tabIndex</code> -1 (not in the tab order) and ignores Enter and Space. The <code>&lt;button&gt;</code> gets focus, both keys and the <code>HTMLButtonElement</code> API for free. Rebuilding that on a div means <code>tabindex</code>, key handlers and styles.</p>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">TESR: a real button gives you</b><b>T</b>iny <b>E</b>lephants <b>S</b>ip <b>R</b>ooibos = <b>T</b>ab stop, <b>E</b>nter key, <b>S</b>pace key, <b>R</b>ole (button). All free.</aside>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">FROG: the first rule of ARIA</b><b>F</b>irst <b>R</b>ule <b>O</b>f ARIA: <b>G</b>o native. Use the real element first. Add ARIA only when no element fits.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Role on a div</b><code>&lt;div role="button"&gt;</code> only <i>announces</i> a button. It is still unfocusable and keyboard-dead until you add <code>tabindex="0"</code> and key handlers.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Redundant roles</b><code>&lt;button role="button"&gt;</code> or <code>&lt;nav role="navigation"&gt;</code> adds nothing. Quiz-style answer: you should never add <code>role="button"</code> to a <code>&lt;button&gt;</code>.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes' div-with-roles example has mismatched quotes (<code>role="banner'</code>) and the <code>&lt;p role="button"&gt;</code> line is mangled by entities. Also add that "no ARIA is better than bad ARIA".</div>
+
+<h2>5. Choosing the right element</h2>
+<ul>
+<li>Ask: "Which element best represents the <b>function</b> of this markup?"</li>
+<li>Never pick an element for its default look (an <code>&lt;h3&gt;</code> because it is smaller, a <code>&lt;blockquote&gt;</code> to indent, a <code>&lt;br&gt;</code> for spacing).</li>
+<li><code>&lt;div&gt;</code> and <code>&lt;span&gt;</code> are fine as last-resort styling hooks when nothing else fits.</li>
+<li>Right elements mean no refactoring comments like <code>&lt;!-- end header --&gt;</code>.</li>
+</ul>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Turn off the CSS test</b>Disable styles (or tab through with the keyboard). If the reading order still makes sense, with headings, lists and landmarks, your semantics are sound.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">ARIA that removes meaning</b><code>role="presentation"</code> or <code>aria-hidden="true"</code> on a focusable element hides it from screen readers while it stays in the tab order. Focus lands on "nothing". Bad ARIA is worse than no ARIA.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Div soup + click handlers</b>A page of divs has no landmarks, no headings, no keyboard access. Screen reader users cannot skim it, so they leave.</aside>
+
+<div class="practice" data-id="m04"></div>
+<div class="quiz" data-id="m04"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

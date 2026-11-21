@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Details &amp; Summary | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Disclosure widgets, accordions">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m16">
+<header class="hero"><div class="in"><div class="kicker">Part 4 &middot; Module 16</div><h1>Details &amp; Summary</h1><p>Disclosure widgets, accordions</p></div></header>
+<main>
+<p>An <b>expander arrow</b> (a <b>disclosure widget</b>) hides and shows content. Stack several and you get an <b>accordion</b>, the classic home of the FAQ page. Before HTML had this, developers faked it with a <code>&lt;label&gt;</code> and a hidden checkbox plus the CSS <code>:checked + div</code> trick, or with a JavaScript library. Today <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code> do it natively, with keyboard support and no script, and have been supported in every modern browser since January 2020.</p>
+
+<h2>1. The two elements</h2>
+<ul>
+<li><code>&lt;details&gt;</code> is the container. <code>&lt;summary&gt;</code> is its always-visible label (a legend or caption) and acts as the button.</li>
+<li>A click, a tap, or pressing <kbd>Enter</kbd> or <kbd>Space</kbd> on a focused <code>&lt;summary&gt;</code> toggles the rest of the contents.</li>
+<li><code>&lt;summary&gt;</code> must be the <b>first child</b> of <code>&lt;details&gt;</code>. Its content is plain text or phrasing content (what fits in a paragraph), optionally with heading content.</li>
+<li>Everything else in <code>&lt;details&gt;</code> is the hidden/shown content.</li>
+</ul>
+<pre><code>&lt;details&gt;
+  &lt;summary&gt;What is the return policy?&lt;/summary&gt;
+  &lt;p&gt;Return it within 30 days, unused, with the receipt.&lt;/p&gt;
+&lt;/details&gt;</code></pre>
+
+<h2>2. The open attribute</h2>
+<ul>
+<li><code>open</code> is a boolean. Present (with any value, or none) means the contents are shown; absent means only the <code>&lt;summary&gt;</code> shows.</li>
+<li>The browser adds and removes <code>open</code> itself as the user clicks, so you can style by state: <code>details[open]</code>.</li>
+<li>Write <code>open</code> in your HTML to start expanded. Leave it out to start collapsed.</li>
+<li>The collapsed content <b>is still in the DOM</b>: it is just not rendered. Scripts can read it, and in some browsers (Chrome, Edge) find-in-page opens a closed <code>&lt;details&gt;</code> that contains the match. Firefox and Safari behaviour has differed, so never depend on it.</li>
+</ul>
+
+<h2>3. Exclusive accordions with name</h2>
+<p>Give several <code>&lt;details&gt;</code> the same <code>name</code> and they behave like radio buttons: opening one closes the others. This is the no-JavaScript accordion, supported in current Chrome, Safari and Firefox.</p>
+<pre><code>&lt;details name="faq" open&gt;&lt;summary&gt;Shipping&lt;/summary&gt;&lt;p&gt;3 to 5 days.&lt;/p&gt;&lt;/details&gt;
+&lt;details name="faq"&gt;&lt;summary&gt;Returns&lt;/summary&gt;&lt;p&gt;30 days.&lt;/p&gt;&lt;/details&gt;
+&lt;details name="faq"&gt;&lt;summary&gt;Warranty&lt;/summary&gt;&lt;p&gt;1 year.&lt;/p&gt;&lt;/details&gt;</code></pre>
+<ul>
+<li>The group is formed by the shared <code>name</code>, across the whole document (or shadow tree). Give each accordion its own name.</li>
+<li>If two members have <code>open</code> in the HTML, the browser keeps only one open.</li>
+<li>Older browsers ignore <code>name</code> and simply let every item open independently. That is graceful degradation, not a bug.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">SOFA: details in four words</b><b>S</b>loths <b>O</b>ccasionally <b>F</b>old <b>A</b>pples = <b>S</b>ummary first, <b>O</b>pen boolean, <b>F</b>ires <code>toggle</code>, <b>A</b>ccordion via shared <code>name</code>.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Two accordions sharing a name</b>Using <code>name="faq"</code> for the shipping accordion and again for the account accordion links them: opening a shipping answer closes an account answer somewhere else on the page. One <code>name</code> per group.</aside>
+
+<h2>4. Styling the marker</h2>
+<ul>
+<li>The triangle is the <code>&lt;summary&gt;</code>'s <b>marker</b>, treated like a list-item marker. Change it with <code>list-style</code> (<code>list-style-type</code>, <code>list-style-image</code>) or style <code>summary::marker</code>, which accepts only a few properties (colour, font size, <code>content</code>).</li>
+<li>Common practice: hide the marker (<code>list-style: none</code>, plus <code>summary::-webkit-details-marker { display: none }</code> for older Safari), then draw your own with <code>summary::before</code> and rotate it for <code>details[open] summary::before</code>.</li>
+<li>Changing <code>summary { display: flex }</code> removes the marker in some browsers: another reason to draw your own icon.</li>
+<li>Always keep a <b>visible indicator</b> that the summary expands. Never remove it without replacing it.</li>
+<li>Add <code>cursor: pointer</code>, spacing between items, and a <code>transition</code> on the icon's rotation. Newer CSS (<code>details::details-content</code>, <code>interpolate-size</code>) can animate the height too; treat it as progressive enhancement.</li>
+</ul>
+<pre><code>summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "▶"; display: inline-block; margin-right: .5em; transition: transform .2s; }
+details[open] &gt; summary::before { transform: rotate(90deg); }</code></pre>
+
+<h2>5. How errors are handled</h2>
+<ul>
+<li><b>No <code>&lt;summary&gt;</code></b>: the browser inserts its own with the word "Details". It lives in a shadow root, so your <code>summary</code> CSS does not touch it. Always write one.</li>
+<li><b><code>&lt;summary&gt;</code> not first</b>: browsers still use the first <code>&lt;summary&gt;</code> child, but the HTML is invalid. Put it first.</li>
+<li><b>Interactive content inside a summary</b> (a link, a <code>&lt;label&gt;</code>, a button) is allowed to parse but browsers disagree on focus and clicks: some tab to both, some toggle when the label is clicked. Avoid it.</li>
+<li><code>&lt;summary&gt;</code> has the implicit role of a button (with expanded/collapsed state) and <code>&lt;details&gt;</code> is a group. Headings inside a summary may lose their heading role for screen readers because a button's children are presentational: test, or put the heading outside.</li>
+<li>Keyboard focus into <code>&lt;summary&gt;</code> varies by browser setting (Safari's "Press Tab to highlight each item" option is a classic surprise). Test with the keyboard.</li>
+</ul>
+
+<h2>6. The HTMLDetailsElement interface</h2>
+<ul>
+<li><code>el.open</code> is a boolean reflecting the <code>open</code> attribute: read it, or set <code>el.open = true</code> to expand.</li>
+<li>The <code>toggle</code> event fires <b>after</b> the state changes, whichever way it changed (click, script, or find-in-page). Read <code>el.open</code> inside it. A <code>beforetoggle</code> event fires first in newer browsers. Listen with <code>addEventListener('toggle', ...)</code>.</li>
+<li><code>toggle</code> does not bubble: attach it to each <code>&lt;details&gt;</code> (or use capture on a parent).</li>
+<li>Newer CSS offers <code>details:open</code> as a pseudo-class; <code>[open]</code> works everywhere.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">DUCK: when to reach for details</b><b>D</b>ucks <b>U</b>sually <b>C</b>ackle <b>K</b>indly = <b>D</b>isclosure content, <b>U</b>ncluttering an FAQ, <b>C</b>ollapsible extras, <b>K</b>eyboard-friendly for free. A menu or a modal is <i>not</i> a disclosure.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Close the others by script</b>You rarely need JavaScript now (use <code>name</code>). If you must support old browsers: <code>document.querySelectorAll('details[open]').forEach(d =&gt; d !== this &amp;&amp; d.removeAttribute('open'))</code> inside each item's <code>toggle</code> handler.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Hash link that opens the answer</b>Open the right answer when someone follows <code>faq.html#returns</code>: on load, <code>const el = document.querySelector(location.hash); el?.closest('details')?.setAttribute('open', '')</code>. (Chrome already does this by itself.)</aside>
+<textarea class="try-src" data-title="Accordion lab: open, name and toggle" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px}
+ details{border:1px solid #bbb;border-radius:6px;margin:6px 0;padding:6px 10px;background:#fff}
+ summary{font-weight:700;cursor:pointer;list-style:none}
+ summary::-webkit-details-marker{display:none}
+ summary::before{content:"\25B6";display:inline-block;margin-right:.5em;transition:transform .2s;color:#A51C30}
+ details[open]&gt;summary::before{transform:rotate(90deg)}
+ #log{background:#eee;padding:6px;font:13px monospace;min-height:3em;white-space:pre-wrap}
+ .plain{margin-top:12px}
+&lt;/style&gt;
+&lt;p&gt;Exclusive accordion (all three share &lt;code&gt;name="faq"&lt;/code&gt;):&lt;/p&gt;
+&lt;details name="faq" open&gt;&lt;summary&gt;Shipping&lt;/summary&gt;&lt;p&gt;3 to 5 working days.&lt;/p&gt;&lt;/details&gt;
+&lt;details name="faq"&gt;&lt;summary&gt;Returns&lt;/summary&gt;&lt;p id="returns"&gt;30 days, unused, with receipt.&lt;/p&gt;&lt;/details&gt;
+&lt;details name="faq"&gt;&lt;summary&gt;Warranty&lt;/summary&gt;&lt;p&gt;1 year.&lt;/p&gt;&lt;/details&gt;
+&lt;div class="plain"&gt;&lt;details id="solo"&gt;&lt;summary&gt;Independent one (no name)&lt;/summary&gt;&lt;p&gt;I do not close the others.&lt;/p&gt;&lt;/details&gt;&lt;/div&gt;
+&lt;p&gt;&lt;button id="b"&gt;Toggle "Independent" via script (el.open)&lt;/button&gt;&lt;/p&gt;
+&lt;div id="log"&gt;toggle log&lt;/div&gt;
+&lt;script&gt;
+ var log=document.getElementById('log');
+ document.querySelectorAll('details').forEach(function(d){
+   d.addEventListener('toggle',function(){
+     log.textContent=(d.querySelector('summary').textContent+' -&gt; open='+d.open+'\n')+log.textContent;
+   });
+ });
+ document.getElementById('b').onclick=function(){var s=document.getElementById('solo'); s.open=!s.open;};
+&lt;/script&gt;</textarea>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Using details as a menu or a modal</b><code>&lt;details&gt;</code> announces "expanded/collapsed", not "menu" or "dialog". A disclosure that hides a nav list is fine; building an ARIA menu or a popup out of it misleads assistive tech. For modals use <code>&lt;dialog&gt;</code>; for popups use the Popover API.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Hiding vital content in a collapsed block</b>Content inside a closed <code>&lt;details&gt;</code> is not rendered, so it is skipped by anyone scanning visually, may not print, and is easy to miss. Do not hide legal notices, errors or required instructions there.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Removing the arrow with nothing in its place</b><code>list-style: none</code> on its own leaves a bare line of text that does not look clickable. Draw an icon, or leave the default marker.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the source title says "Summarises": the element is <code>&lt;summary&gt;</code> (module title is "Details & Summary"). "Collapsed content is not part of the DOM" is wrong: it is in the DOM but not rendered (that is why find-in-page can open it). The notes claim <code>&lt;summary&gt;</code> accepts "heading content": it accepts phrasing content, optionally with headings (accessibility caveat added). The Safari keyboard note was softened: it depends on settings. "Space between each dialog" is a slip for each <code>&lt;details&gt;</code>. The notes omit the <code>name</code> attribute (exclusive accordions) and <code>beforetoggle</code>/<code>details:open</code>, now added. The source says the toggle event "is fired when toggled": it fires after the change and does not bubble. Removed: web.dev "On this page" references, jQuery history aside (shortened), CodePen iframes, quiz.</div>
+
+<div class="practice" data-id="m16"></div>
+<div class="quiz" data-id="m16"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

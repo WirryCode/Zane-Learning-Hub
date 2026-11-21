@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Headings &amp; Sections | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Landmarks, header, footer, main, article, section">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m03">
+<header class="hero"><div class="in"><div class="kicker">Part 1 &middot; Module 03</div><h1>Headings &amp; Sections</h1><p>Landmarks, header, footer, main, article, section</p></div></header>
+<main>
+<h2>1. Why semantic structure beats divs</h2>
+<p>Compare three ways to build the same site header. All can look identical with CSS, but only the last tells browsers, search engines and screen readers what everything <i>is</i>.</p>
+<pre><code>&lt;!-- 1. Div soup: no meaning, needs ids/classes + comments --&gt;
+&lt;div id="pageHeader"&gt;
+  &lt;div id="title"&gt;Machine Learning Workshop&lt;/div&gt;
+  &lt;div id="navigation"&gt; ...links... &lt;/div&gt;
+&lt;/div&gt; &lt;!-- end header --&gt;
+
+&lt;!-- 2. Roles added: meaning, but verbose --&gt;
+&lt;div role="banner"&gt;
+  &lt;div role="heading" aria-level="1"&gt;Machine Learning Workshop&lt;/div&gt;
+  &lt;div role="navigation"&gt; ...links... &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- 3. Semantic: meaning for free, no classes needed --&gt;
+&lt;header&gt;
+  &lt;h1&gt;Machine Learning Workshop&lt;/h1&gt;
+  &lt;nav&gt; ...links... &lt;/nav&gt;
+&lt;/header&gt;</code></pre>
+<p>The semantic version needs no <code>id</code> or <code>class</code> hooks, and you can style it with low-specificity selectors such as <code>header nav a</code>.</p>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">HNMAF: the page skeleton</b><b>H</b>ungry <b>N</b>inja <b>M</b>unches <b>A</b>ll <b>F</b>ood = <b>H</b>eader, <b>N</b>av, <b>M</b>ain, <b>A</b>side, <b>F</b>ooter.</aside>
+
+<h2>2. Header and footer: sometimes landmarks</h2>
+<table class="t"><tr><th>Element</th><th>Where it sits</th><th>Role</th></tr>
+<tr><td><code>&lt;header&gt;</code></td><td>Top level of <code>&lt;body&gt;</code></td><td><b>banner</b> landmark (site header)</td></tr>
+<tr><td><code>&lt;header&gt;</code></td><td>Inside <code>main</code>, <code>article</code>, <code>section</code></td><td>No landmark: just that section's header</td></tr>
+<tr><td><code>&lt;footer&gt;</code></td><td>Top level of <code>&lt;body&gt;</code></td><td><b>contentinfo</b> landmark (copyright, contact, policies)</td></tr>
+<tr><td><code>&lt;footer&gt;</code></td><td>Inside <code>article</code>, <code>aside</code>, <code>main</code>, <code>nav</code>, <code>section</code></td><td>No landmark</td></tr></table>
+<p><code>&lt;address&gt;</code> is for contact details of a person or organisation (usually in a footer). Despite its name, it is <b>not</b> for any postal address you want to display.</p>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">One header per page</b>Wrong: a page may have many <code>&lt;header&gt;</code> and <code>&lt;footer&gt;</code> elements (one per article, for example). Only the <i>top-level</i> ones are landmarks.</aside>
+
+<h2>3. The structural elements</h2>
+<table class="t"><tr><th>Element</th><th>Purpose</th><th>Implicit role</th><th>How many?</th></tr>
+<tr><td><code>&lt;main&gt;</code></td><td>The dominant content of the page</td><td>main</td><td><b>One</b> visible per page</td></tr>
+<tr><td><code>&lt;nav&gt;</code></td><td>Major navigation blocks</td><td>navigation</td><td>Several, label each</td></tr>
+<tr><td><code>&lt;aside&gt;</code></td><td>Tangentially related content, side boxes</td><td>complementary</td><td>As needed</td></tr>
+<tr><td><code>&lt;article&gt;</code></td><td>Self-contained, reusable content (blog post, news story, comment)</td><td>article</td><td>As needed</td></tr>
+<tr><td><code>&lt;section&gt;</code></td><td>Generic thematic grouping with a heading</td><td>region (only if named)</td><td>As needed</td></tr></table>
+<textarea class="try-src" data-title="Holy-grail layout" hidden>&lt;body style="font-family:sans-serif"&gt;
+  &lt;header style="background:#A51C30;color:#fff;padding:8px"&gt;&lt;h1&gt;My Blog&lt;/h1&gt;
+    &lt;nav&gt;&lt;a style="color:#fff" href="#a"&gt;Home&lt;/a&gt; | &lt;a style="color:#fff" href="#b"&gt;About&lt;/a&gt;&lt;/nav&gt;
+  &lt;/header&gt;
+  &lt;main style="padding:8px"&gt;
+    &lt;article&gt;&lt;h2&gt;First post&lt;/h2&gt;&lt;p&gt;Self-contained story.&lt;/p&gt;&lt;/article&gt;
+    &lt;article&gt;&lt;h2&gt;Second post&lt;/h2&gt;&lt;p&gt;Could be syndicated elsewhere.&lt;/p&gt;&lt;/article&gt;
+  &lt;/main&gt;
+  &lt;aside style="background:#f3ecd8;padding:8px"&gt;Related links&lt;/aside&gt;
+  &lt;footer style="background:#1c1417;color:#fff;padding:8px"&gt;&amp;copy; 2026 Wilfred Wanyoike&lt;/footer&gt;
+&lt;/body&gt;</textarea>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">ASA test: article or section?</b>Could it live <b>A</b>lone on another site? Yes → <code>&lt;article&gt;</code>. Is it a <b>S</b>ubdivision of a bigger piece with a heading? → <code>&lt;section&gt;</code>. Is it just <b>A</b>ppearance/layout? → <code>&lt;div&gt;</code>.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Section with no heading</b>A <code>&lt;section&gt;</code> should almost always have a heading. A section without one is usually a <code>&lt;div&gt;</code> in disguise. If you only need a styling wrapper, use <code>&lt;div&gt;</code>.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Many mains</b>Using <code>&lt;main&gt;</code> for every page region. The spec allows one visible <code>&lt;main&gt;</code> per page; extra ones must carry the <code>hidden</code> attribute. (The notes say "one"; the nuance is that hidden extras exist for single-page apps.)</aside>
+
+<h2>4. Nesting: how headings fit the structure</h2>
+<ul>
+<li>A heading in the top-level <code>&lt;header&gt;</code> names the site or application.</li>
+<li>A heading in <code>&lt;main&gt;</code> names that page.</li>
+<li>A heading in an <code>&lt;article&gt;</code> or <code>&lt;section&gt;</code> names that subsection.</li>
+<li>Use levels like a word processor: <code>&lt;h1&gt;</code> then <code>&lt;h2&gt;</code> then <code>&lt;h3&gt;</code>. Do not skip levels.</li>
+</ul>
+<p>Example: a newspaper home page has a site <code>&lt;header&gt;</code>, one <code>&lt;main&gt;</code> with several <code>&lt;section&gt;</code>s ("World news", "Politics"), and each section contains several <code>&lt;article&gt;</code>s. An article can itself contain sections.</p>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Quick landmark audit</b>Open browser DevTools, then the Accessibility panel, to see the accessibility tree. You will see <code>banner</code>, <code>navigation</code>, <code>main</code>, <code>complementary</code> and <code>contentinfo</code> appear straight from your tags. If they are missing, your page is div soup.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Label repeated landmarks</b>Two <code>&lt;nav&gt;</code> elements? Give each a name: <code>&lt;nav aria-label="Primary"&gt;</code> and <code>&lt;nav aria-label="Footer"&gt;</code>, so screen readers can tell them apart.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes sometimes write <code>&lt;headers&gt;</code>; the element is <code>&lt;header&gt;</code> (singular). And "the holy grail layout" means header, main content, two sidebars, footer, and the markup order shown is correct for source order, with CSS handling positioning.</div>
+
+<div class="practice" data-id="m03"></div>
+<div class="quiz" data-id="m03"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

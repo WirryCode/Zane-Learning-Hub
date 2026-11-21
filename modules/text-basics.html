@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Text Basics | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Headings, paragraphs, quotes, entities">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m02">
+<header class="hero"><div class="in"><div class="kicker">Part 1 &middot; Module 02</div><h1>Text Basics</h1><p>Headings, paragraphs, quotes, entities</p></div></header>
+<main>
+<h2>1. Headings: six levels, one outline</h2>
+<p>HTML gives you <code>&lt;h1&gt;</code> (most important) to <code>&lt;h6&gt;</code> (least). Think of a textbook: title, chapters, sections, sub-sections. Browsers size them largest to smallest by default, but <b>size is not the point</b>: the level is a statement about structure.</p>
+<p>Browsers never implemented the once-planned "document outline" algorithm, and it was removed from the HTML specification. Screen reader users, however, jump through a page using headings (the <b>H</b> key), so a logical order is essential.</p>
+<textarea class="try-src" data-title="Heading staircase" hidden>&lt;h1&gt;Machine Learning Workshop&lt;/h1&gt;
+&lt;h2&gt;What you will learn&lt;/h2&gt;
+&lt;h3&gt;Week 1: Basics&lt;/h3&gt;
+&lt;h3&gt;Week 2: Models&lt;/h3&gt;
+&lt;h2&gt;Instructors&lt;/h2&gt;
+&lt;p&gt;Try breaking the order: change an h3 to h5, then ask "does the outline still make sense?"&lt;/p&gt;</textarea>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">STAIRS: heading rules</b><b>S</b>tart at h1, <b>T</b>ake one step at a time, <b>A</b>lways go down by one, <b>I</b>nclude one main h1, <b>R</b>eset levels by sectioning, <b>S</b>tyle with CSS, never with headings.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Headings for looks</b>Using <code>&lt;h4&gt;</code> because it "looks the right size", or <code>&lt;h3&gt;</code> to make text bold. Choose the heading by structure, then resize it with CSS. For emphasis use <code>&lt;strong&gt;</code> or <code>&lt;em&gt;</code>.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Nested h1 shrinking</b>Old browsers shrank an <code>&lt;h1&gt;</code> nested inside <code>&lt;section&gt;</code> or <code>&lt;article&gt;</code>. Modern browsers removed those rules, and assistive technology never honoured them (a nested h1 was always "heading level 1"). Never rely on nesting to change a heading's level.</aside>
+
+<h2>2. Paragraphs and line breaks</h2>
+<p><code>&lt;p&gt;</code> marks a paragraph. The closing <code>&lt;/p&gt;</code> is technically optional, but always write it: it prevents surprises, for example a <code>&lt;div&gt;</code> after an unclosed <code>&lt;p&gt;</code> silently closes it.</p>
+<p><code>&lt;br&gt;</code> inserts a line break <i>within</i> a block: addresses, poems, signature blocks. It is not a spacing tool. To separate paragraphs, close one <code>&lt;p&gt;</code> and open another; the gap is then controlled by CSS margins and is accessible.</p>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">br br br</b>Stacking <code>&lt;br&gt;&lt;br&gt;</code> to create paragraph spacing, or using <code>&amp;nbsp;</code> runs for indentation. Use <code>&lt;p&gt;</code> and CSS <code>margin</code> or <code>padding</code>.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Whitespace collapses</b>HTML collapses runs of spaces and line breaks into one space. To preserve formatting (code, ASCII art, poetry) use <code>&lt;pre&gt;</code>, or CSS <code>white-space: pre-wrap</code>.</aside>
+
+<h2>3. Quotations and citations</h2>
+<table class="t"><tr><th>Element</th><th>Kind</th><th>Browser adds quote marks?</th><th>Closing tag</th></tr>
+<tr><td><code>&lt;blockquote&gt;</code></td><td>Block quote (long)</td><td><b>No</b> (indents it)</td><td>Always required</td></tr>
+<tr><td><code>&lt;q&gt;</code></td><td>Inline quote (short)</td><td><b>Yes</b>, language-aware</td><td>Required</td></tr>
+<tr><td><code>&lt;cite&gt;</code></td><td>Title of a <i>work</i></td><td>No (italic by default)</td><td>Required</td></tr></table>
+<textarea class="try-src" data-title="Quote anatomy" hidden>&lt;blockquote cite="https://example.com/review"&gt;
+  &lt;p&gt;The workshop exceeded my wildest expectations.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Review by Blendan Smooth, in &lt;cite&gt;Smoothie Weekly&lt;/cite&gt;.&lt;/p&gt;
+
+&lt;p&gt;HAL said, &lt;q&gt;I'm sorry, Dave, I'm afraid I can't do that.&lt;/q&gt;&lt;/p&gt;
+&lt;p lang="fr"&gt;Il a dit : &lt;q&gt;Bonjour tout le monde.&lt;/q&gt;&lt;/p&gt;</textarea>
+<ul>
+<li>The author's name is <b>not</b> part of the quote, so it goes after the <code>&lt;blockquote&gt;</code>, usually in its own <code>&lt;p&gt;</code>.</li>
+<li>The <code>&lt;cite&gt;</code> element holds the <b>work</b> (book, film, website, program), not the person.</li>
+<li>The <code>cite</code> <b>attribute</b> (on <code>&lt;q&gt;</code> and <code>&lt;blockquote&gt;</code>) takes a URL. It is machine-readable only; users do not see it.</li>
+<li>Putting <code>lang</code> on the quote's container tells the browser which quotation marks to use and helps voice assistants pronounce it.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">BQC: pick the quote tag</b><b>B</b>ig quote = <b>B</b>lockquote (block). <b>Q</b>uick quote = <b>Q</b> (inline). <b>C</b>redit the <b>C</b>reation = <b>C</b>ite (title of work).</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Cite means author</b><code>&lt;cite&gt;Jane Doe&lt;/cite&gt;</code> is wrong when naming the speaker. Cite the work (<code>&lt;cite&gt;Smoothie Weekly&lt;/cite&gt;</code>). Also, do not add manual quote marks inside <code>&lt;q&gt;</code>: you will get double quotes.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Quote marks on blockquote</b><code>&lt;blockquote&gt;</code> shows none by default. Add them with CSS: <code>blockquote p::before { content: open-quote; }</code></aside>
+
+<h2>4. Entities: writing reserved characters</h2>
+<p>Because <code>&lt;</code> starts a tag, you must <b>escape</b> it to display it. A character reference starts with <code>&amp;</code> and ends with <code>;</code>.</p>
+<table class="t"><tr><th>You want</th><th>Write</th><th>Name</th></tr>
+<tr><td>&lt;</td><td><code>&amp;lt;</code></td><td>less than</td></tr>
+<tr><td>&gt;</td><td><code>&amp;gt;</code></td><td>greater than</td></tr>
+<tr><td>&amp;</td><td><code>&amp;amp;</code></td><td>ampersand</td></tr>
+<tr><td>&quot;</td><td><code>&amp;quot;</code></td><td>double quote</td></tr>
+<tr><td>&copy;</td><td><code>&amp;copy;</code></td><td>copyright</td></tr>
+<tr><td>&trade;</td><td><code>&amp;trade;</code></td><td>trademark</td></tr>
+<tr><td>(space)</td><td><code>&amp;nbsp;</code></td><td>non-breaking space</td></tr></table>
+<textarea class="try-src" data-title="Entities lab" hidden>&lt;p&gt;To make a paragraph, write &amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;.&lt;/p&gt;
+&lt;p&gt;&amp;copy; 2026 Wilfred Wanyoike &amp;trade;&lt;/p&gt;
+&lt;p&gt;10&amp;nbsp;km stays on one line. Smile: &amp;#x1F600; or &amp;#128512;&lt;/p&gt;
+&lt;p&gt;Tom &amp;amp; Jerry&lt;/p&gt;</textarea>
+<p>There are over 2,000 named references, and <i>every</i> character has a numeric form: <code>&amp;#169;</code> (decimal) or <code>&amp;#xA9;</code> (hex). With <code>&lt;meta charset="utf-8"&gt;</code> you may type most characters directly (é, ©, 😀); you only <b>must</b> escape <code>&lt;</code> and <code>&amp;</code>.</p>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Entity typos</b><code>&amp;copyright;</code> does not exist (the name is <code>&amp;copy;</code>). A missing semicolon or wrong name prints as literal text. Remember: <b>&</b> + name + <b>;</b>.</aside>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">LAQ: always-escape trio</b><b>L</b>ess-than <code>&amp;lt;</code>, <b>A</b>mpersand <code>&amp;amp;</code>, <b>Q</b>uote (inside attributes) <code>&amp;quot;</code> = "Let's Always Quote".</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say you "generally do not need" <code>&amp;gt;</code>, <code>"</code> or <code>&amp;amp;</code>. In practice, <b>always escape <code>&amp;amp;</code></b> in text and URLs (<code>?a=1&amp;amp;b=2</code>): a bare <code>&amp;</code> followed by letters can be read as the start of an entity. <code>&gt;</code> and <code>"</code> are safe in plain text but <code>"</code> must be escaped inside a double-quoted attribute. Also, the notes call the nested-landmark exercise "Oceana"; the region is spelled Oceania.</div>
+
+<h2>5. Sections need a name to be landmarks</h2>
+<p>A <code>&lt;section&gt;</code> is only exposed as a <b>region landmark</b> when it has an accessible name. Link its heading with <code>aria-labelledby</code>:</p>
+<pre><code>&lt;section id="about" aria-labelledby="about_heading"&gt;
+  &lt;h2 id="about_heading"&gt;What you'll learn&lt;/h2&gt;
+  &lt;p&gt;...&lt;/p&gt;
+&lt;/section&gt;</code></pre>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Not everything is a landmark</b>Too many landmarks create noise for screen reader users. Name only the big, important sections.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes' sample heading reads "What you'll earn"; the workshop teaches, so it should say "What you'll learn".</div>
+
+<div class="practice" data-id="m02"></div>
+<div class="quiz" data-id="m02"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

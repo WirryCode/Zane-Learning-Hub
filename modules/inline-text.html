@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Other Inline Text | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="em, strong, mark, time, abbr, code">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m08">
+<header class="hero"><div class="in"><div class="kicker">Part 2 &middot; Module 08</div><h1>Other Inline Text</h1><p>em, strong, mark, time, abbr, code</p></div></header>
+<main>
+<p>HTML was built for sharing <i>documents</i>, so it has many small inline elements that add meaning to text. Pick them for meaning; CSS handles looks.</p>
+
+<h2>1. Code and technical writing</h2>
+<table class="t"><tr><th>Element</th><th>Use for</th></tr>
+<tr><td><code>&lt;code&gt;</code></td><td>A fragment of code (monospace). Wrap multi-line code in <code>&lt;pre&gt;</code> to keep whitespace</td></tr>
+<tr><td><code>&lt;samp&gt;</code></td><td>Sample <i>output</i> from a program</td></tr>
+<tr><td><code>&lt;kbd&gt;</code></td><td>User input: keys, voice commands, any entry</td></tr>
+<tr><td><code>&lt;var&gt;</code></td><td>A variable or placeholder in maths or code (italic)</td></tr>
+<tr><td><code>&lt;data value=""&gt;</code></td><td>Content plus a machine-readable value</td></tr>
+<tr><td><code>&lt;time datetime=""&gt;</code></td><td>A date, time or duration. Use instead of <code>&lt;data&gt;</code> for anything time-related</td></tr></table>
+<pre><code>&lt;p&gt;Press &lt;kbd&gt;Ctrl&lt;/kbd&gt; + &lt;kbd&gt;S&lt;/kbd&gt;. The console prints &lt;samp&gt;Saved 3 files&lt;/samp&gt;.&lt;/p&gt;
+&lt;p&gt;Solve for &lt;var&gt;x&lt;/var&gt; in &lt;var&gt;x&lt;/var&gt;&lt;sup&gt;2&lt;/sup&gt; + 1 = 5.&lt;/p&gt;
+&lt;p&gt;Class starts &lt;time datetime="2026-12-01T09:00"&gt;1 December at 9am&lt;/time&gt;.&lt;/p&gt;
+&lt;p&gt;Water is H&lt;sub&gt;2&lt;/sub&gt;O.&lt;/p&gt;</code></pre>
+<p>For heavy maths use <b>MathML</b> instead of stacking <code>&lt;var&gt;</code>, <code>&lt;sup&gt;</code> and <code>&lt;sub&gt;</code>.</p>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">CKSVP: the code family</b><b>C</b>ats <b>K</b>nit <b>S</b>weaters, <b>V</b>ery <b>P</b>retty = <code>code</code>, <code>kbd</code>, <code>samp</code>, <code>var</code>, <code>pre</code>.</aside>
+
+<h2>2. Edits and typography</h2>
+<ul>
+<li><code>&lt;del&gt;</code> marks removed text, <code>&lt;ins&gt;</code> marks added text. Both take <code>cite</code> (a URL explaining the change) and <code>datetime</code>.</li>
+<li><code>&lt;s&gt;</code> marks content that is no longer relevant or accurate but not <i>removed</i> (an old price). It is not an edit record.</li>
+<li><code>&lt;sup&gt;</code> and <code>&lt;sub&gt;</code> are for typographic raising and lowering: exponents, footnote marks, chemical formulas.</li>
+<li><code>&lt;small&gt;</code> is for side comments and fine print (legal text, copyright), not just "make it smaller".</li>
+</ul>
+
+<h2>3. Definitions and language</h2>
+<ul>
+<li><b>Abbreviations:</b> spell the term out on first use, then wrap the short form in <code>&lt;abbr&gt;</code>. <code>&lt;abbr&gt;</code> may mark later uses too.</li>
+<li><code>title</code> on <code>&lt;abbr&gt;</code> is valid, but it does nothing on touch or keyboard, so never rely on it. Skip well-known terms like HTML.</li>
+<li><code>&lt;dfn&gt;</code> marks the term being defined, inside the sentence that defines it. Add <code>lang</code> if it is in another language.</li>
+<li><code>&lt;bdi&gt;</code> isolates text of unknown direction (usernames); <code>&lt;bdo dir="rtl"&gt;</code> forces a direction.</li>
+<li><code>&lt;ruby&gt;</code> holds East Asian pronunciation guides: base text, <code>&lt;rt&gt;</code> (the annotation) and <code>&lt;rp&gt;</code> (parentheses shown only if ruby is unsupported).</li>
+</ul>
+<pre><code>&lt;p&gt;The &lt;dfn&gt;World Wide Web Consortium&lt;/dfn&gt; (&lt;abbr&gt;W3C&lt;/abbr&gt;) sets web standards.&lt;/p&gt;
+&lt;ruby&gt;漢&lt;rp&gt;(&lt;/rp&gt;&lt;rt&gt;kan&lt;/rt&gt;&lt;rp&gt;)&lt;/rp&gt;&lt;/ruby&gt;</code></pre>
+
+<h2>4. Emphasis family</h2>
+<table class="t"><tr><th>Element</th><th>Meaning</th></tr>
+<tr><td><code>&lt;em&gt;</code></td><td><b>Stress</b>: changes the sentence's meaning when spoken. Nesting increases stress</td></tr>
+<tr><td><code>&lt;strong&gt;</code></td><td><b>Importance</b>, seriousness or urgency</td></tr>
+<tr><td><code>&lt;mark&gt;</code></td><td><b>Relevance</b>: highlight, e.g. a search hit</td></tr>
+<tr><td><code>&lt;cite&gt;</code></td><td>The <b>title</b> of a creative work</td></tr>
+<tr><td><code>&lt;i&gt;</code></td><td>Alternate voice: technical term, foreign phrase, thought, ship name. Not just "italic"</td></tr>
+<tr><td><code>&lt;u&gt;</code></td><td>Non-textual annotation, such as a flagged misspelling</td></tr>
+<tr><td><code>&lt;b&gt;</code></td><td>Draw attention with no extra importance. Last resort</td></tr></table>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">ESM: the three real emphasisers</b><b>E</b>lephants <b>S</b>ing <b>M</b>errily = <b>E</b>m (stress), <b>S</b>trong (importance), <b>M</b>ark (relevance).</aside>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">IBU: the last-resort three</b><b>I</b>gloos <b>B</b>ounce <b>U</b>p = <code>i</code>, <code>b</code>, <code>u</code>. Reach for them only when no other element fits.</aside>
+
+<h2>5. Whitespace and void elements</h2>
+<ul>
+<li><code>&lt;br&gt;</code> is a line break <i>inside</i> content (poems, address lines), not a spacing tool.</li>
+<li><code>&lt;hr&gt;</code> is a thematic break between topics (role <code>separator</code>), not just a line.</li>
+<li><code>&lt;wbr&gt;</code> is an optional break point inside long strings such as URLs. It adds no hyphen.</li>
+<li>These are all <b>void elements</b>: no content, no end tag. A trailing slash (<code>&lt;br/&gt;</code>) is allowed but means nothing in HTML.</li>
+</ul>
+<textarea class="try-src" data-title="Inline text lab" hidden>&lt;style&gt;body{font-family:sans-serif;line-height:1.7} kbd{border:1px solid #888;border-radius:3px;padding:0 4px;background:#eee}&lt;/style&gt;
+&lt;p&gt;Press &lt;kbd&gt;Ctrl&lt;/kbd&gt;+&lt;kbd&gt;Z&lt;/kbd&gt; to undo. Output: &lt;samp&gt;Done in 3s&lt;/samp&gt;&lt;/p&gt;
+&lt;p&gt;Price: &lt;s&gt;$50&lt;/s&gt; &lt;ins datetime="2026-11-01"&gt;$35&lt;/ins&gt;. &lt;mark&gt;Limited stock&lt;/mark&gt;. &lt;small&gt;Terms apply.&lt;/small&gt;&lt;/p&gt;
+&lt;p&gt;I &lt;em&gt;really&lt;/em&gt; mean it. &lt;strong&gt;Warning:&lt;/strong&gt; it is &lt;em&gt;&lt;em&gt;very&lt;/em&gt;&lt;/em&gt; hot.&lt;/p&gt;
+&lt;p&gt;Long string: &lt;code&gt;0100001&lt;wbr&gt;1011011&lt;wbr&gt;0111101&lt;wbr&gt;1011011&lt;wbr&gt;0110111&lt;wbr&gt;1001010&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;I always spell &lt;u&gt;licence&lt;/u&gt; wrong. Water is H&lt;sub&gt;2&lt;/sub&gt;O and E = mc&lt;sup&gt;2&lt;/sup&gt;.&lt;/p&gt;</textarea>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">i for icons</b><code>&lt;i class="icon-home"&gt;&lt;/i&gt;</code> is a common icon-font habit. <code>&lt;i&gt;</code> means an alternate voice. Use <code>&lt;span&gt;</code> (hidden from assistive tech) or an inline <code>&lt;svg&gt;</code>.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Picking tags for looks</b><code>&lt;b&gt;</code> for any bold, <code>&lt;em&gt;</code> for any italic, <code>&lt;br&gt;&lt;br&gt;</code> for paragraph spacing, <code>&lt;u&gt;</code> for emphasis. Use <code>&lt;strong&gt;</code>/<code>&lt;em&gt;</code> for meaning and CSS for style.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Auto-highlight search hits</b>Wrap matches in <code>&lt;mark&gt;</code> and style <code>mark { background: gold }</code>. Screen readers can announce the highlight, a plain <code>&lt;span&gt;</code> cannot.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Hand-break long strings</b>Place <code>&lt;wbr&gt;</code> after slashes in long URLs, or use CSS <code>overflow-wrap: anywhere</code> for the lazy fix.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Underline looks like a link</b><code>&lt;u&gt;</code> is underlined by default, so users click it expecting a link. Restyle it (wavy red) or avoid it.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">abbr title only</b>Relying on <code>title</code> for the expansion hides it from touch and many screen readers. Always spell the term out in the text.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say <code>&lt;abbr&gt;</code> is needed "only on this first occurrence" and that <code>title</code> is "not helpful": the real rule is to spell out on first use and mark abbreviations as needed, while <code>title</code> is valid but unreliable. <code>&lt;cite&gt;</code> is for the <i>title</i> of a work, not an ISBN or a person's name. <code>&lt;ruby&gt;</code> is for East Asian text; the claim that it covers Hebrew, Arabic and Vietnamese was removed. <code>&lt;wbr/&gt;</code> is a void element (no slash needed). The <code>&lt;address&gt;</code> postal example is only valid as contact info for the page or article owner. <code>&lt;i&gt;</code>, <code>&lt;b&gt;</code> and <code>&lt;u&gt;</code> were never really "deprecated": they were redefined. Removed: CodePen embeds, the W3C bidi link.</div>
+
+<div class="practice" data-id="m08"></div>
+<div class="quiz" data-id="m08"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

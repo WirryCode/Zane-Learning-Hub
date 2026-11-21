@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Document Setup | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Doctype, lang, head essentials, CSS, scripts, base">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m01">
+<header class="hero"><div class="in"><div class="kicker">Part 1 &middot; Module 01</div><h1>Document Setup</h1><p>Doctype, lang, head essentials, CSS, scripts, base</p></div></header>
+<main>
+<h2>1. The skeleton every page needs</h2>
+<p>Every HTML document is a tree: a <b>doctype</b>, one root <code>&lt;html&gt;</code> element, and exactly two children: <code>&lt;head&gt;</code> (invisible information) and <code>&lt;body&gt;</code> (what people see). Browsers will still render a page that is missing these, but they will guess, and guessing is how bugs are born.</p>
+<textarea class="try-src" data-title="The minimum valid page" hidden>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;My first page&lt;/title&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello, exam hall!&lt;/h1&gt;
+  &lt;p&gt;Edit me, then press Run.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">DL-CTV: the five must-haves</b><b>D</b>ogs <b>L</b>ike <b>C</b>hasing <b>T</b>iny <b>V</b>ans = <b>D</b>octype, <b>L</b>ang, <b>C</b>harset, <b>T</b>itle, <b>V</b>iewport. If your page has all five, it passes the "professional start" test.</aside>
+
+<h2>2. Doctype: standards vs quirks</h2>
+<p><code>&lt;!DOCTYPE html&gt;</code> is not a tag; it is a special <i>doctype node</i>. It must be the very first thing in the file. It tells the browser to use <b>standards mode</b>. Without it the browser falls into <b>quirks mode</b>, an emulation of 1990s browser behaviour that changes box sizing, table inheritance and more.</p>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Doctype missing or not first</b>A blank line is fine, but a comment, a stray character, or an XML declaration before the doctype can push some browsers into quirks mode. Symptom: CSS that "works everywhere except this page".</aside>
+
+<h2>3. The lang attribute</h2>
+<p><code>lang</code> on <code>&lt;html&gt;</code> declares the page's main human language using an ISO code plus an optional region, for example <code>en</code>, <code>en-GB</code>, <code>fr-CA</code>, <code>sw</code>. Screen readers use it to pick the right pronunciation, search engines use it for indexing, and translation tools use it to decide whether to offer a translation.</p>
+<p>You can override it on any element for a passage in another language. It has no visual effect, but it can be targeted in CSS.</p>
+<pre><code>&lt;p&gt;She said: &lt;span lang="fr-FR"&gt;Ceci n'est pas une pipe.&lt;/span&gt;&lt;/p&gt;
+
+/* CSS: two ways to target French content */
+[lang|="fr"] { font-style: italic; }
+:lang(fr)    { color: #A51C30; }</code></pre>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Region codes matter</b><code>fr-CA</code> and <code>fr-BF</code> (Canada vs Burkina Faso) can differ in pronunciation and quotation marks. Use the plain language code (<code>en</code>) unless the region really changes something.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the original notes show <code>&lt;span lang='fr-fr"&gt;</code> with mismatched quote marks. Always open and close attribute values with the same quote character.</div>
+
+<h2>4. Inside the head: the big three</h2>
+<h3>Character encoding</h3>
+<p><code>&lt;meta charset="utf-8"&gt;</code> must be the <b>first</b> child of <code>&lt;head&gt;</code> (and within the first 1024 bytes of the file) so the browser knows how to decode everything after it, including the title. The old default in many browsers is windows-1252, which turns "é" and emoji into garbage. UTF-8 handles every character using one to four bytes.</p>
+<h3>Title</h3>
+<p><code>&lt;title&gt;</code> appears in the tab, history, bookmarks, search results and social cards. Each page needs a <b>unique</b> title. Avoid emoji in titles: screen readers read them aloud and they are inaccessible.</p>
+<h3>Viewport</h3>
+<p>Without <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code>, phones pretend to be about 980px wide and shrink your page. This one line is what makes responsive CSS work.</p>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Disabling zoom</b>Adding <code>user-scalable=no</code> or <code>maximum-scale=1</code> stops people pinching to zoom. That fails accessibility audits (Lighthouse flags it). Leave scaling alone.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes' example <code>&lt;meta name='viewport" ...&gt;</code> mixes ' and ". Use matching quotes. The notes also use two different domains for the same fictional site (machinelearningworkshop.com and machinelearning.com); a canonical URL must be identical everywhere.</div>
+
+<h2>5. Adding CSS</h2>
+<table class="t"><tr><th>Method</th><th>Where</th><th>Use when</th></tr>
+<tr><td><code>&lt;link rel="stylesheet" href="styles.css"&gt;</code></td><td>head</td><td><b>Default choice.</b> Cached across pages, one place to maintain.</td></tr>
+<tr><td><code>&lt;style&gt;...&lt;/style&gt;</code></td><td>head</td><td>Small pages, critical CSS, custom properties, <code>@import ... layer()</code>.</td></tr>
+<tr><td><code>style="..."</code> attribute</td><td>any element</td><td>One-off overrides and quick tests. Hard to maintain, high specificity.</td></tr></table>
+<p>Put styles in the head: the browser then knows how to paint content the first time, avoiding a flash of unstyled content and repaints.</p>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Forgetting rel</b><code>&lt;link href="styles.css"&gt;</code> without <code>rel="stylesheet"</code> links nothing and fails silently. <code>rel</code> defines the <i>relationship</i>; no relationship, no CSS.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">@import in the wrong place</b><code>@import</code> rules must be the first statements in a stylesheet or <code>&lt;style&gt;</code> block (only <code>@charset</code> may come before). Placed later, they are ignored. Syntax for a cascade layer: <code>@import "styles.css" layer(base);</code></aside>
+
+<h2>6. link rel: icons, alternates, canonical</h2>
+<pre><code>&lt;link rel="icon" sizes="32x32" type="image/png" href="/images/icon.png"&gt;
+&lt;link rel="apple-touch-icon" sizes="180x180" href="/images/icon-180.png"&gt;
+&lt;link rel="alternate" href="https://example.com/fr/" hreflang="fr-FR"&gt;
+&lt;link rel="alternate" type="application/rss+xml" href="/feed.xml"&gt;
+&lt;link rel="canonical" href="https://example.com/"&gt;</code></pre>
+<ul>
+<li><code>icon</code>: the favicon. If you declare none, browsers look for <code>/favicon.ico</code> in the site root.</li>
+<li><code>apple-touch-icon</code>: used only when someone adds your site to an iOS home screen. <code>mask-icon</code> is a monochrome SVG for pinned tabs in desktop Safari.</li>
+<li><code>alternate</code>: translations (needs <code>hreflang</code>), feeds (needs <code>type</code>), or alternate stylesheets (needs <code>title</code>).</li>
+<li><code>canonical</code>: tells search engines which URL is the authoritative copy when the same content lives at several addresses.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">ICAC: link rel values</b><b>I</b>ce <b>C</b>ream <b>A</b>lways <b>C</b>heers = <b>I</b>con, <b>C</b>anonical, <b>A</b>lternate, <b>C</b>SS (stylesheet). Add <code>manifest</code> and <code>preload</code> for later modules.</aside>
+
+<h2>7. Scripts: defer, async, or bottom</h2>
+<p>A plain <code>&lt;script&gt;</code> blocks parsing: the browser stops, downloads, runs it, then continues. Three ways to avoid the pain:</p>
+<table class="t"><tr><th>Strategy</th><th>Download</th><th>Runs</th><th>Order kept?</th></tr>
+<tr><td>Plain, in head</td><td>blocks parsing</td><td>immediately</td><td>yes</td></tr>
+<tr><td><code>defer</code></td><td>parallel</td><td>after HTML is parsed</td><td><b>yes</b></td></tr>
+<tr><td><code>async</code></td><td>parallel</td><td>as soon as downloaded (pauses parsing)</td><td><b>no</b></td></tr>
+<tr><td>Before <code>&lt;/body&gt;</code></td><td>after content</td><td>when reached</td><td>yes</td></tr></table>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">DAD: Defer After Document</b><code>defer</code> = runs <b>A</b>fter the <b>D</b>ocument is parsed, in order. <code>async</code> = runs <b>A</b>s soon as it <b>S</b>hows up, any order (analytics, ads).</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">defer on an inline script</b><code>defer</code> and <code>async</code> only work on scripts with a <code>src</code>. On an inline <code>&lt;script&gt;</code> they do nothing. Scripts with <code>type="module"</code> are deferred automatically.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Modern default</b><code>&lt;script src="app.js" defer&gt;&lt;/script&gt;</code> in the head is the cleanest pattern: it downloads early, runs late, and keeps order.</aside>
+
+<h2>8. The base element</h2>
+<p><code>&lt;base href="https://example.com/" target="_top"&gt;</code> sets the base URL for every relative link and a default target for links and forms. Rules: only <b>one</b> per document, and it must appear before any relative URL.</p>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">base breaks fragment links</b>With <code>&lt;base&gt;</code> present, <code>&lt;a href="#top"&gt;</code> resolves against the base URL, so it triggers a page load of the base address with <code>#top</code> appended instead of jumping within the page. Many developers avoid <code>&lt;base&gt;</code> for this reason.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Targets</b><code>_self</code> (default) same context, <code>_blank</code> new tab, <code>_parent</code> parent frame, <code>_top</code> whole tab. When using <code>_blank</code> on links, add <code>rel="noopener"</code> (modern browsers imply it, but old habits are safe).</aside>
+
+<h2>Complete head, assembled</h2>
+<textarea class="try-src" data-title="Full professional head" hidden>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;Machine Learning Workshop&lt;/title&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;meta name="description" content="A hands-on workshop for beginners."&gt;
+  &lt;link rel="icon" href="/images/favicon.png"&gt;
+  &lt;link rel="canonical" href="https://example.com/"&gt;
+  &lt;style&gt;
+    :root { --theme: #A51C30; }
+    body { font-family: Georgia, serif; }
+    h1 { color: var(--theme); }
+  &lt;/style&gt;
+  &lt;!-- A real page loads its script here: &lt;script defer src="app.js"&gt;&lt;/script&gt; (left commented so this editor has no missing file) --&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Machine Learning Workshop&lt;/h1&gt;
+  &lt;p&gt;Open the editor, change the theme colour, press Run.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say that if <code>&lt;html&gt;</code> is omitted "the language is implied". More accurately, the language is simply <i>undeclared</i>, so assistive tech and search engines must guess.</div>
+
+<div class="practice" data-id="m01"></div>
+<div class="quiz" data-id="m01"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

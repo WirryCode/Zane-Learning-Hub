@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Navigation | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="nav, menus, skip links">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m05">
+<header class="hero"><div class="in"><div class="kicker">Part 2 &middot; Module 05</div><h1>Navigation</h1><p>nav, menus, skip links</p></div></header>
+<main>
+<p>Navigation is a group of links that helps users move around. There are no strict rules for how it <i>looks</i>, but how it is marked up decides whether everyone can use it.</p>
+
+<h2>1. Types of navigation</h2>
+<table class="t"><tr><th>Type</th><th>Purpose</th></tr>
+<tr><td>Global</td><td>Top-level pages; identical on every page</td></tr>
+<tr><td>Local</td><td>Links within the current section or page</td></tr>
+<tr><td>Breadcrumb</td><td>Where this page sits in the site hierarchy</td></tr>
+<tr><td>Table of contents</td><td>Jump links to headings on this page</td></tr>
+<tr><td>Site map</td><td>Hierarchical links to every page</td></tr>
+<tr><td>Skip link</td><td>Bypass repeated blocks to reach <code>&lt;main&gt;</code></td></tr></table>
+<p>Goal: any page in as few clicks as possible, without overwhelming the user. Footers should also be identical on every page, but they do not have to mirror global navigation.</p>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">GLBTS: navigation family</b><b>G</b>oats <b>L</b>ove <b>B</b>aking <b>T</b>asty <b>S</b>cones = <b>G</b>lobal, <b>L</b>ocal, <b>B</b>readcrumb, <b>T</b>able of contents, <b>S</b>ite map.</aside>
+
+<h2>2. The nav landmark and its name</h2>
+<p><code>&lt;nav&gt;</code> has the implicit role <b>navigation</b>, a landmark. Use it for <i>major</i> blocks of links only. Name each one when there is more than one.</p>
+<pre><code>&lt;!-- Visible heading exists: point at it --&gt;
+&lt;nav aria-labelledby="tocTitle"&gt;
+  &lt;p id="tocTitle"&gt;On this page&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href="#types"&gt;Types&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#skip"&gt;Skip links&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+
+&lt;!-- No visible text: use aria-label, WITHOUT the word "navigation" --&gt;
+&lt;nav aria-label="Primary"&gt; ... &lt;/nav&gt;</code></pre>
+<ul>
+<li><code>aria-labelledby</code> reuses visible text (best: one source of truth). <code>aria-label</code> is hidden text.</li>
+<li>Screen readers already say "navigation", so <code>aria-label="Primary"</code> not "Primary navigation".</li>
+<li>Put links in a <code>&lt;ul&gt;</code> so users hear "list, 5 items".</li>
+</ul>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Everything is a nav</b>Wrapping every link cluster in <code>&lt;nav&gt;</code> floods the landmark list. Reserve it for major blocks (primary, breadcrumb, table of contents, footer groups).</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Naming it "navigation"</b><code>aria-label="Main navigation"</code> is announced "Main navigation navigation". Name the purpose only.</aside>
+
+<h2>3. Skip link</h2>
+<p>A "Skip to main content" link, first in the focus order, lets keyboard users bypass the repeated header and menu. It may be hidden visually, but it <b>must become visible when focused</b>.</p>
+<textarea class="try-src" data-title="Skip link and breadcrumb" hidden>&lt;style&gt;
+body{font-family:sans-serif;margin:0}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:8px;top:8px;background:#A51C30;color:#fff;padding:6px 10px}
+nav ol{display:flex;gap:6px;list-style:none;padding:8px;margin:0;background:#f3ecd8}
+nav li+li::before{content:"/ ";color:#888}
+[aria-current=page]{font-weight:bold;color:#A51C30}
+&lt;/style&gt;
+&lt;a class="skip" href="#main"&gt;Skip to main&lt;/a&gt;
+&lt;nav aria-label="Breadcrumbs"&gt;
+  &lt;ol&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Learn&lt;/a&gt;&lt;/li&gt;
+    &lt;li aria-current="page"&gt;Navigation&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/nav&gt;
+&lt;main id="main" tabindex="-1" style="padding:8px"&gt;
+  &lt;h1&gt;Navigation&lt;/h1&gt;&lt;p&gt;Click here, then press Tab: the skip link appears.&lt;/p&gt;
+&lt;/main&gt;</textarea>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Make the target focusable</b>Give the skip target <code>tabindex="-1"</code> (<code>&lt;main id="main" tabindex="-1"&gt;</code>). Focus then really moves there in every browser, not just the scroll position.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Hidden skip link that can't be focused</b><code>display:none</code> or <code>visibility:hidden</code> removes it from the tab order, so it never appears. Hide by moving off-screen, then reveal on <code>:focus</code>.</aside>
+
+<h2>4. Breadcrumbs and the current page</h2>
+<ul>
+<li>Use <code>&lt;nav aria-label="Breadcrumbs"&gt;</code> containing an <b>ordered</b> list (the order matters).</li>
+<li>Separators are decoration: add them with CSS <code>li + li::before</code> so screen readers do not read them. Keep contrast adequate.</li>
+<li>If the current page is included, make it plain text and add <code>aria-current="page"</code>. Do the same for the current link in global or local navigation.</li>
+<li>Breadcrumbs show hierarchy, not the path the user clicked through; do not label click-history as breadcrumbs.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">ONA: breadcrumb recipe</b><b>O</b>ctopuses <b>N</b>ap <b>A</b>lot = <b>O</b>l inside a <b>N</b>av, with <b>A</b>ria-current on the current item.</aside>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">LLAMA: good nav checklist</b><b>L</b>abel it, <b>L</b>ist it, <b>A</b>ria-current the page, <b>M</b>ark it with <code>&lt;nav&gt;</code>, <b>A</b>lways the same on every page (global).</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Style from the attribute</b><code>nav a[aria-current="page"] { font-weight: 700 }</code> styles the current link straight from the accessibility attribute. No extra class to forget.</aside>
+
+<h2>5. Keep order predictable</h2>
+<p>Layouts may change with the viewport, but tab order should not surprise people. Do not ship two copies of the navigation and hide one. Keep one nav in the DOM and let CSS move it, as long as DOM order still makes sense.</p>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Menu role misuse</b><code>role="menu"</code> promises app-style arrow-key behaviour you probably did not build. For dropdowns use a <code>&lt;button aria-expanded aria-controls&gt;</code> that reveals a plain list of links.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes' code has mismatched quotes (<code>aria-label="breadcrumbs'"</code>, <code>href="/learn'</code>), and shows <code>aria-selected="true"</code> on a link: that attribute is invalid for links, so use only <code>aria-current</code>. The JS <code>url.pathname.split('/)</code> is missing a quote and yields an empty first segment (use <code>.split('/').filter(Boolean)</code>). Also, the claim that attribute text "may not be translated" depends on the tool; visible text is simply safer. Removed: web.dev page walkthroughs and Yahoo!/Google examples.</div>
+
+<div class="practice" data-id="m05"></div>
+<div class="quiz" data-id="m05"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

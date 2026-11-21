@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>HTML APIs | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="DOM interfaces, Storage, Fetch, observers, permissions">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m19">
+<header class="hero"><div class="in"><div class="kicker">Part 4 &middot; Module 19</div><h1>HTML APIs</h1><p>DOM interfaces, Storage, Fetch, observers, permissions</p></div></header>
+<main>
+<p>HTML elements are the nodes that make up the <b>Document Object Model</b> (DOM). Markup describes the page; <b>APIs</b> let JavaScript read and change it. This module covers the element interfaces that every node inherits, then maps the wider family of HTML-related browser APIs (storage, network, location, drag and drop, history, canvas, observers) and the permission rules that govern them.</p>
+
+<h2>1. The DOM and the accessibility tree</h2>
+<ul>
+<li>The <b>DOM</b> is an API for accessing and changing documents: a tree of nodes (elements, attributes, text) where some nodes can have children and others cannot. The middle letter is "Object": every node is a JavaScript object with properties, methods and events.</li>
+<li>The browser builds a second tree, the <b>accessibility tree</b>, from the DOM plus computed style. It holds only what assistive technology needs (role, name, state): <code>display: none</code> and <code>hidden</code> nodes are absent, and unlabelled <code>&lt;div&gt;</code>s are generic. The "AOM" (Accessibility Object Model) is the name for APIs that would expose and modify it; ordinary developer tools show it in a separate accessibility panel, not in the Elements panel.</li>
+<li>The Elements panel in dev tools shows the <b>DOM</b>, which may differ from your source: the parser fixes errors (missing <code>&lt;tbody&gt;</code>, misplaced tags) and scripts change it.</li>
+</ul>
+
+<h2>2. What element APIs give you</h2>
+<ul>
+<li><b>Attributes</b> through properties: <code>img.alt</code>, <code>a.href</code>, <code>input.value</code>, <code>details.open</code>. Properties often <i>reflect</i> attributes, but not always (<code>input.value</code> is the current value, the <code>value</code> attribute is the default).</li>
+<li><b>Layout</b> information, read-only: <code>el.offsetHeight</code>, <code>el.getBoundingClientRect()</code>. It updates automatically when the viewport changes. Reading it forces the browser to calculate layout, so reading and writing in a loop slows the page (see the Performance module).</li>
+<li><b>State</b>: <code>video.duration</code>, <code>video.currentTime</code>, <code>video.ended</code>, <code>form.checkValidity()</code>, <code>dialog.returnValue</code>.</li>
+</ul>
+<pre><code>document.querySelectorAll('img').forEach(img =&gt; console.log(img.alt));
+document.querySelectorAll('section').forEach(s =&gt; console.log(s.offsetHeight));</code></pre>
+
+<h2>3. Element interfaces</h2>
+<p>Almost every element has an interface named <b>HTML + group + Element</b> in upper camel case: <code>&lt;a&gt;</code> is <code>HTMLAnchorElement</code>, <code>&lt;img&gt;</code> is <code>HTMLImageElement</code>, <code>&lt;td&gt;</code>/<code>&lt;th&gt;</code> share <code>HTMLTableCellElement</code>. The middle part has no strict pattern, and you do not need to memorise them: know they exist and look them up.</p>
+<table class="t"><tr><th>Interface</th><th>Elements</th></tr>
+<tr><td><code>HTMLMediaElement</code></td><td><code>&lt;audio&gt;</code>, <code>&lt;video&gt;</code> (base for <code>HTMLAudioElement</code>, <code>HTMLVideoElement</code>)</td></tr>
+<tr><td><code>HTMLTableCellElement</code></td><td><code>&lt;td&gt;</code>, <code>&lt;th&gt;</code></td></tr>
+<tr><td><code>HTMLTableSectionElement</code></td><td><code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tfoot&gt;</code></td></tr>
+<tr><td><code>HTMLModElement</code></td><td><code>&lt;ins&gt;</code>, <code>&lt;del&gt;</code></td></tr>
+<tr><td><code>HTMLQuoteElement</code></td><td><code>&lt;q&gt;</code>, <code>&lt;blockquote&gt;</code></td></tr>
+<tr><td><code>HTMLFormElement</code>, <code>HTMLInputElement</code>, <code>HTMLSelectElement</code>, <code>HTMLTextAreaElement</code>, <code>HTMLButtonElement</code>, <code>HTMLOutputElement</code></td><td>Forms</td></tr>
+<tr><td><code>HTMLDetailsElement</code>, <code>HTMLDialogElement</code>, <code>HTMLTemplateElement</code>, <code>HTMLSlotElement</code></td><td>Covered in modules 16 to 18</td></tr>
+<tr><td><code>HTMLCanvasElement</code>, <code>HTMLDataElement</code>, <code>HTMLTimeElement</code>, <code>HTMLMeterElement</code>, <code>HTMLProgressElement</code>, <code>HTMLScriptElement</code>, <code>HTMLLinkElement</code></td><td>Their matching elements</td></tr></table>
+<ul>
+<li>Over 30 elements have no interface beyond <code>HTMLElement</code> (<code>&lt;address&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;header&gt;</code>, <code>&lt;footer&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;hgroup&gt;</code>...). Others, like <code>HTMLParagraphElement</code>, exist but add nothing. An unrecognised tag such as <code>&lt;foo&gt;</code> is an <code>HTMLUnknownElement</code>.</li>
+<li>Collections have interfaces too: <code>HTMLCollection.namedItem(name)</code> returns the first element whose <code>id</code> or <code>name</code> matches, or <code>null</code>.</li>
+</ul>
+
+<h2>4. The inheritance chain</h2>
+<p><code>EventTarget</code> → <code>Node</code> → <code>Element</code> → <code>HTMLElement</code> → the specific interface (e.g. <code>HTMLImageElement</code>).</p>
+<ul>
+<li><code>EventTarget</code> gives <code>addEventListener()</code> and <code>removeEventListener()</code> to nodes and to <code>Window</code>.</li>
+<li><code>Node</code> is the base of every kind of node: <code>firstChild</code>, <code>nextSibling</code>, <code>appendChild()</code>, <code>cloneNode()</code>, <code>parentNode</code>, <code>textContent</code>. <code>Element</code>, <code>Document</code> and <code>DocumentFragment</code> inherit from it.</li>
+<li><code>HTMLElement</code> adds what all HTML elements share: <code>hidden</code>, <code>title</code>, <code>dataset</code>, <code>style</code>, <code>click()</code>, <code>focus()</code>, <code>innerText</code>, <code>contentEditable</code>.</li>
+<li><b>Override rule</b>: if a child interface defines a property or method with the same name as one it inherits, the <b>child's version wins</b>. Example: <code>HTMLCollection.length</code> is read-only, but <code>HTMLOptionsCollection.length</code> (the <code>options</code> of a <code>&lt;select&gt;</code>) can also be set, to resize the list.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">ENEH: the inheritance ladder</b><b>E</b>els <b>N</b>ever <b>E</b>at <b>H</b>ay = <b>E</b>ventTarget, <b>N</b>ode, <b>E</b>lement, <b>H</b>TMLElement, then the specific <code>HTMLxxxElement</code>.</aside>
+<pre><code>// Crockford-style "walk the DOM": visit a node, then each child in turn
+function walk(node, callback) {
+  callback(node);
+  node = node.firstChild;
+  while (node) { walk(node, callback); node = node.nextSibling; }
+}</code></pre>
+
+<h2>5. Document and Window</h2>
+<ul>
+<li><code>Document</code> (a <code>Node</code>) represents the loaded page: <code>document.body</code>, <code>document.title</code>, <code>document.styleSheets</code>, <code>document.querySelector()</code>, <code>createElement()</code>, <code>location</code>, <code>lastModified</code>, <code>cookie</code>. <code>document</code> is an instance of <code>HTMLDocument</code>, which inherits from <code>Document</code>. HTMLDocument is the old name for the HTML-specific document.</li>
+<li><code>Window</code> is the global object of one tab (every tab has its own). It is the home of things that are not the DOM tree: <code>devicePixelRatio</code>, <code>innerWidth</code>, <code>location</code>, <code>history</code>, <code>localStorage</code>, timers, and constructors such as <code>Worker</code>. <code>window.resizeTo()</code> only works on windows opened by script, so on a normal tab it does nothing.</li>
+<li>Collections: <code>getElementsByClassName</code> and <code>children</code> return <b>live</b> <code>HTMLCollection</code>s that update as the DOM changes. <code>querySelectorAll</code> returns a <b>static</b> <code>NodeList</code> (it has <code>forEach</code>, but not <code>map</code>).</li>
+<li>Set text with <code>textContent</code> (safe, fast). Using <code>innerHTML</code> with user-supplied strings enables cross-site scripting (XSS).</li>
+<li><code>Element.shadowRoot</code> leads to a <code>ShadowRoot</code> (see the previous module).</li>
+</ul>
+
+<h2>6. The wider HTML API family</h2>
+<table class="t"><tr><th>API</th><th>Key idea</th></tr>
+<tr><td><b>Web Storage</b>: <code>localStorage</code>, <code>sessionStorage</code></td><td>Key-value <b>strings</b>, about 5 MB per origin, synchronous. <code>localStorage</code> persists, <code>sessionStorage</code> lasts for the tab. Same-origin only. <code>JSON.stringify</code> objects. Never store secrets.</td></tr>
+<tr><td><b>Fetch</b></td><td><code>fetch(url)</code> returns a Promise. It rejects only on network failure: a 404 or 500 still <b>resolves</b>, so check <code>response.ok</code>. Cancel with <code>AbortController</code>.</td></tr>
+<tr><td><b>Geolocation</b></td><td><code>navigator.geolocation.getCurrentPosition(ok, err)</code> and <code>watchPosition</code>. Needs a secure context and the user's permission.</td></tr>
+<tr><td><b>Drag and Drop</b></td><td>Set <code>draggable="true"</code>. Events: <code>dragstart</code>, <code>dragover</code>, <code>drop</code>. Call <code>preventDefault()</code> in <code>dragover</code> or the element is not a valid drop target. Data travels in <code>event.dataTransfer</code>.</td></tr>
+<tr><td><b>History</b></td><td><code>history.pushState(state, "", url)</code>, <code>replaceState</code>, and the <code>popstate</code> event. It changes the URL without a page load: the basis of single-page-app routing.</td></tr>
+<tr><td><b>Canvas</b></td><td><code>canvas.getContext('2d')</code>, pixel drawing. The result is a bitmap with no semantics: give it text alternatives or fallback content.</td></tr>
+<tr><td><b>Observers</b></td><td><code>IntersectionObserver</code> (is it in view? lazy loading, infinite scroll), <code>MutationObserver</code> (DOM changed), <code>ResizeObserver</code> (size changed). All batch callbacks and avoid polling.</td></tr>
+<tr><td><b>Popover</b></td><td>HTML-only: <code>popover</code> on an element and <code>popovertarget</code> on a button. Light dismiss and top layer without script; the <code>togglePopover()</code> method and <code>toggle</code> event exist too.</td></tr>
+<tr><td><b>Others</b></td><td>Clipboard, Notifications, Fullscreen (<code>requestFullscreen()</code>), Page Visibility, Web Workers (off-thread scripts), IndexedDB (large structured storage), Media Capture and Streams, Web Audio.</td></tr></table>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">IMR: the three observers</b><b>I</b>guanas <b>M</b>unch <b>R</b>adishes = <b>I</b>ntersection, <b>M</b>utation, <b>R</b>esize observers.</aside>
+
+<h2>7. Secure contexts and permissions</h2>
+<ul>
+<li>Powerful APIs work only in a <b>secure context</b>: HTTPS, or <code>localhost</code> while developing. Check with <code>window.isSecureContext</code>. On plain HTTP, geolocation, service workers, the async Clipboard API and camera access are simply unavailable.</li>
+<li>Many also need the user's <b>permission</b>, usually asked after a user gesture (a click): geolocation, notifications, camera and microphone, clipboard read. Permission can be denied, or blocked by a <code>Permissions-Policy</code> header or the <code>allow</code> attribute of an iframe.</li>
+<li>Always handle the denied and unsupported cases. Ask for a permission when the user takes an action that needs it, not on page load. <code>navigator.permissions.query({name:'geolocation'})</code> reports the current state without prompting.</li>
+<li>Feature-detect: <code>if ('geolocation' in navigator)</code>, not browser sniffing.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">GNCC: APIs that ask permission</b><b>G</b>iraffes <b>N</b>ever <b>C</b>hew <b>C</b>arpets = <b>G</b>eolocation, <b>N</b>otifications, <b>C</b>amera/microphone, <b>C</b>lipboard (read).</aside>
+<textarea class="try-src" data-title="API explorer: prototypes, live lists, observers" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px} button{padding:5px 10px;font:inherit}
+ pre{background:#eee;padding:6px;font-size:12px;white-space:pre-wrap}
+ #sc{height:80px;overflow:auto;border:2px solid #A51C30;margin:6px 0} #sc div{height:70px;padding:6px}
+ #tg{background:#fde}
+&lt;/style&gt;
+&lt;ul id="list"&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/ul&gt;
+&lt;button id="add"&gt;Add an li&lt;/button&gt;
+&lt;div id="sc"&gt;&lt;div&gt;scroll down inside this box&lt;/div&gt;&lt;div id="tg"&gt;I am watched (IntersectionObserver)&lt;/div&gt;&lt;div&gt;bottom&lt;/div&gt;&lt;/div&gt;
+&lt;pre id="o1"&gt;&lt;/pre&gt;&lt;pre id="o2"&gt;&lt;/pre&gt;&lt;pre id="o3"&gt;&lt;/pre&gt;
+&lt;script&gt;
+ function chain(el){var o=[],p=Object.getPrototypeOf(el);while(p&amp;&amp;p!==Object.prototype){o.push(p.constructor.name);p=Object.getPrototypeOf(p);}return o.join(' -&gt; ');}
+ var t='';
+ ['div','a','img','input','dialog','section','x-demo','foo'].forEach(function(n){t+='&lt;'+n+'&gt;  '+chain(document.createElement(n))+'\n';});
+ document.getElementById('o1').textContent=t;
+ var live=document.getElementsByTagName('li'), stat=document.querySelectorAll('li');
+ function lists(){document.getElementById('o2').textContent='live HTMLCollection length: '+live.length+'\nstatic NodeList length:  '+stat.length+'  (re-run querySelectorAll to refresh)';}
+ lists();
+ document.getElementById('add').onclick=function(){var li=document.createElement('li');li.textContent='new';document.getElementById('list').appendChild(li);lists();};
+ var o3=document.getElementById('o3'), notes=[];
+ notes.push('isSecureContext: '+window.isSecureContext+'   geolocation in navigator: '+('geolocation' in navigator));
+ try{localStorage.setItem('k','v');notes.push('localStorage works');}catch(e){notes.push('localStorage blocked in this sandbox: '+e.name);}
+ fetch('data:application/json,{"ok":true,"status":"fake 404 would still resolve"}').then(function(r){return r.json();}).then(function(j){notes.push('fetch resolved: '+JSON.stringify(j));o3.textContent=notes.join('\n');}).catch(function(e){notes.push('fetch failed: '+e.name);o3.textContent=notes.join('\n');});
+ o3.textContent=notes.join('\n');
+ new IntersectionObserver(function(es){es.forEach(function(e){notes.push('target is '+(e.isIntersecting?'VISIBLE':'hidden')+' (ratio '+e.intersectionRatio.toFixed(2)+')');});o3.textContent=notes.join('\n');},{root:document.getElementById('sc'),threshold:[0,0.5,1]}).observe(document.getElementById('tg'));
+&lt;/script&gt;</textarea>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Treating querySelectorAll as live</b><code>const items = document.querySelectorAll('li')</code> is a snapshot. New items do not appear in it. <code>getElementsByTagName</code> and <code>children</code> are live. A loop that adds to a live list while iterating it can run forever.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">fetch rejects on 404</b>It does not. <code>fetch('/missing')</code> resolves with <code>response.ok === false</code>. Test <code>if (!response.ok) throw new Error(response.status)</code> before reading the body.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Storing objects directly</b><code>localStorage.setItem('user', {name:'HAL'})</code> saves the text <code>[object Object]</code>. Use <code>JSON.stringify</code> to save and <code>JSON.parse</code> to read.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Cheap, modern shortcuts</b><code>el.closest('.card')</code> walks up to an ancestor. <code>AbortSignal.timeout(5000)</code> gives <code>fetch</code> a timeout. <code>structuredClone(obj)</code> deep-copies. <code>Object.fromEntries(new FormData(form))</code> turns a form into an object. <code>IntersectionObserver</code> replaces scroll-listener polling.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Popover without JavaScript</b><code>&lt;button popovertarget="tip"&gt;Info&lt;/button&gt;&lt;div id="tip" popover&gt;Hello&lt;/div&gt;</code> opens a light-dismiss popup in the top layer, closes on Escape or an outside click, and needs no script.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">innerHTML with user input</b><code>el.innerHTML = userText</code> runs any markup in it, including <code>&lt;img onerror=...&gt;</code>: a classic XSS hole. Use <code>textContent</code>, or sanitise.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Geolocation or clipboard on plain HTTP</b><code>navigator.geolocation</code> and the async Clipboard API are blocked outside secure contexts, and prompting on page load gets denied. Serve over HTTPS, ask after a click, and handle the error callback.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Drag and drop that never drops</b>If <code>dragover</code> does not call <code>event.preventDefault()</code>, the browser refuses the drop and <code>drop</code> never fires. Also provide a keyboard alternative: drag and drop alone is not accessible.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say the tree shown in browser tools is the accessibility tree: the Elements panel shows the DOM, and the accessibility tree is a separate view. They say "parent methods and properties override children": it is the reverse, the inheriting (child) interface's member overrides the inherited one (this is also why <code>HTMLOptionsCollection.length</code> can be written while <code>HTMLCollection.length</code> cannot). "Document also inherits from HTMLDocument" is backwards: <code>HTMLDocument</code> inherits from <code>Document</code>. The Drag and Drop and Fullscreen APIs "inherit from Element": they are surfaced through events and methods on elements and the document, not inheritance. <code>window.resizeTo()</code> is shown as a general tool but only works on script-opened windows. <code>shadowRoot</code> "interface" is <code>ShadowRoot</code>. "AOM is based off the DOM" restated (see Semantics). The source chapter called "HTML APIs" covers only the DOM interfaces, so Web Storage, Fetch, Geolocation, Drag and Drop, History, Canvas, observers, Popover and secure-context/permission rules were added. The two uploaded APIs PDFs were identical except one OCR character. Removed: CodePen/quiz text.</div>
+
+<div class="practice" data-id="m19"></div>
+<div class="quiz" data-id="m19"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

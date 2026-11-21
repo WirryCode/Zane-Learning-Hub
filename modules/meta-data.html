@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Meta Data | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Social cards, SEO, manifest, icons">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m14">
+<header class="hero"><div class="in"><div class="kicker">Part 3 &middot; Module 14</div><h1>Meta Data</h1><p>Social cards, SEO, manifest, icons</p></div></header>
+<main>
+<p>Everything in <code>&lt;head&gt;</code> is metadata: <code>&lt;title&gt;</code>, <code>&lt;link&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;style&gt;</code>, <code>&lt;base&gt;</code>. The <code>&lt;meta&gt;</code> element covers metadata those cannot express. Metadata is invisible on the page but drives search results, social cards, browser colours, installability and security.</p>
+
+<h2>1. How meta tags are built</h2>
+<table class="t"><tr><th>Form</th><th>Attributes</th><th>Example</th></tr>
+<tr><td>Charset</td><td><code>charset</code> only</td><td><code>&lt;meta charset="utf-8"&gt;</code></td></tr>
+<tr><td>Pragma directive</td><td><code>http-equiv</code> + <code>content</code></td><td><code>&lt;meta http-equiv="refresh" content="..."&gt;</code></td></tr>
+<tr><td>Named metadata</td><td><code>name</code> + <code>content</code></td><td><code>&lt;meta name="description" content="..."&gt;</code></td></tr>
+<tr><td>Open Graph (not in the spec)</td><td><code>property</code> + <code>content</code></td><td><code>&lt;meta property="og:title" content="..."&gt;</code></td></tr></table>
+<ul>
+<li><code>charset</code> replaced the older <code>&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;</code>. For HTML the only legal value is <code>utf-8</code> (case-insensitive). Put it first in the head, within the first 1024 bytes.</li>
+<li><code>http-equiv</code> means "HTTP equivalent": it mimics an HTTP response header when you cannot set one.</li>
+<li><code>name</code> and <code>http-equiv</code> tags must have <code>content</code>.</li>
+<li>The <code>viewport</code> meta is the other must-have: <code>width=device-width, initial-scale=1</code>.</li>
+</ul>
+
+<h2>2. Pragma directives (http-equiv)</h2>
+<ul>
+<li>The spec lists seven, but only a few matter: <code>refresh</code>, <code>content-security-policy</code> (and rarely <code>x-ua-compatible</code>, <code>default-style</code>). <code>content-language</code> is obsolete (use <code>lang</code>).</li>
+<li><b>refresh</b> reloads or redirects after N seconds: <code>content="5; url=https://example.com/new"</code>. Avoid it. Unexpected reloads or redirects disorient users and break accessibility (WCAG timing rules). For permanent moves, use a server redirect (301/308). If you must use it, give enough time, a visible link, and a way to stop it.</li>
+<li><b>content-security-policy</b> limits where scripts, styles, images and frames may load from, reducing cross-site scripting: <code>&lt;meta http-equiv="content-security-policy" content="default-src https:"&gt;</code>. A real HTTP header is better: the meta version cannot do <code>frame-ancestors</code>, <code>report-uri</code> or <code>sandbox</code>.</li>
+</ul>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Refresh without url=</b><code>content="60; https://example.com"</code> is missing the <code>url=</code>. It happens to work in browsers that guess, but the correct syntax is <code>seconds; url=...</code>.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Silent redirect</b>An instant <code>refresh</code> redirect breaks the Back button (it bounces forward again) and confuses screen readers. Redirect on the server.</aside>
+
+<h2>3. Named meta tags</h2>
+<table class="t"><tr><th>name</th><th>Purpose</th></tr>
+<tr><td><code>description</code></td><td>The snippet search engines often show under your title. One or two accurate sentences. <b>Worth including.</b></td></tr>
+<tr><td><code>theme-color</code></td><td>Colours the browser's address bar or tab strip. Takes a <code>media</code> attribute (only this meta does) for light/dark variants.</td></tr>
+<tr><td><code>robots</code></td><td><code>noindex, nofollow</code>: ask crawlers not to index the page or follow links. Index and follow are the default. A request, not a law</td></tr>
+<tr><td><code>keywords</code></td><td><b>Ignored</b> by search engines since it was abused with spam. Skip it.</td></tr>
+<tr><td><code>color-scheme</code></td><td><code>light dark</code> tells the browser which UI schemes the page supports</td></tr>
+<tr><td><code>referrer</code>, <code>author</code>, <code>generator</code>, <code>application-name</code></td><td>Occasional extras</td></tr></table>
+<ul>
+<li>Use one of each name, except <code>theme-color</code> with different <code>media</code>. If you add a legacy duplicate, put the newer one first because browsers use the first match.</li>
+<li><code>noindex</code> only works if the crawler may fetch the page: do not also block it in <code>robots.txt</code>.</li>
+</ul>
+<pre><code>&lt;meta name="description" content="Register for a machine learning workshop for machines who cannot learn good."&gt;
+&lt;meta name="theme-color" content="#226DAA" media="(prefers-color-scheme: light)"&gt;
+&lt;meta name="theme-color" content="#0b2540" media="(prefers-color-scheme: dark)"&gt;
+&lt;meta name="robots" content="noindex, nofollow"&gt;</code></pre>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">CVDT: head essentials</b><b>C</b>ows <b>V</b>acation <b>D</b>own <b>T</b>hailand = <b>C</b>harset, <b>V</b>iewport, <b>D</b>escription, <b>T</b>heme-color: the four meta tags nearly every page wants.</aside>
+
+<h2>4. Social cards: Open Graph and Twitter/X</h2>
+<p>When someone pastes your link into a social or chat app, it builds a card. Without metadata it uses the <code>&lt;title&gt;</code> and <code>description</code>. With it you choose the title, text and picture.</p>
+<ul>
+<li>Open Graph tags use <code>property</code> (an extension, so it cannot clash with future <code>name</code> values): <code>og:title</code>, <code>og:description</code>, <code>og:image</code> (an <b>absolute https</b> URL), <code>og:image:alt</code>, <code>og:url</code> (the canonical URL), <code>og:type</code>, <code>og:site_name</code>.</li>
+<li>Twitter/X cards use <code>name</code> with a <code>twitter:</code> prefix. The key one is <code>twitter:card</code> (<code>summary</code> or <code>summary_large_image</code>); then <code>twitter:title</code>, <code>twitter:description</code>, <code>twitter:image</code> and <code>twitter:image:alt</code>. Where a <code>twitter:</code> tag is missing, X falls back to the Open Graph tag.</li>
+<li>The image needs alt text here too (<code>og:image:alt</code>, <code>twitter:image:alt</code>).</li>
+<li>Different URLs may produce different cards, handy for campaign links.</li>
+<li>Share previews are cached by each platform: use their debugger tools after changing tags.</li>
+</ul>
+<pre><code>&lt;meta property="og:title" content="Machine Learning Workshop"&gt;
+&lt;meta property="og:description" content="School for machines who cannot learn good."&gt;
+&lt;meta property="og:image" content="https://example.com/images/all.png"&gt;
+&lt;meta property="og:image:alt" content="Line drawing of home appliances"&gt;
+&lt;meta property="og:url" content="https://example.com/"&gt;
+&lt;meta name="twitter:card" content="summary_large_image"&gt;</code></pre>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">TDIU: the four card basics</b><b>T</b>igers <b>D</b>rink <b>I</b>ced <b>U</b>nicorn-milk = <b>T</b>itle, <b>D</b>escription, <b>I</b>mage, <b>U</b>RL (then add the card type).</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Relative or http image</b><code>og:image="/img/all.png"</code> or an <code>http://</code> link often gives a blank card. Use a full <code>https://</code> URL.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">property vs name mix-up</b><code>&lt;meta name="og:title"&gt;</code> is not Open Graph; it must be <code>property="og:title"</code>. Twitter tags use <code>name="twitter:..."</code>. Mixing them is a very common silent fail.</aside>
+
+<h2>5. Icons, app mode and the manifest</h2>
+<ul>
+<li><code>&lt;link rel="icon" href="/favicon.svg" type="image/svg+xml"&gt;</code> (plus a PNG/ICO fallback) sets the tab icon.</li>
+<li><code>&lt;link rel="apple-touch-icon" href="/icons/180.png"&gt;</code> is the home-screen icon on iOS.</li>
+<li><code>&lt;link rel="apple-touch-startup-image" ... media="(orientation: portrait)"&gt;</code>: the <code>media</code> value must include parentheses.</li>
+<li><code>&lt;meta name="mobile-web-app-capable" content="yes"&gt;</code> (older: <code>apple-mobile-web-app-capable</code>) says the page works as a standalone app. Only add it if the app really has its own navigation: no browser back button.</li>
+<li><code>&lt;meta name="application-name"&gt;</code> and <code>apple-mobile-web-app-title</code> give a short name for the home screen.</li>
+<li>A <b>web app manifest</b> is a JSON file (<code>manifest.webmanifest</code>) holding the name, <code>short_name</code>, icons, colours and <code>display</code> mode. Link it: <code>&lt;link rel="manifest" href="/manifest.webmanifest"&gt;</code>. It replaces most of the tags above for a progressive web app. Defining <code>theme-color</code> in HTML still helps the colour appear before the manifest loads.</li>
+<li><code>&lt;link rel="canonical" href="..."&gt;</code> tells search engines the preferred URL for duplicates. <code>rel="alternate" hreflang="fr-FR"</code> points to translations (add <code>x-default</code>).</li>
+</ul>
+<textarea class="try-src" data-title="A complete, correct head" hidden>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;Machine Learning Workshop&lt;/title&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;meta name="description" content="Register for a workshop for machines who cannot learn good."&gt;
+  &lt;meta name="theme-color" content="#226DAA"&gt;
+  &lt;meta property="og:title" content="Machine Learning Workshop"&gt;
+  &lt;meta property="og:image" content="https://example.com/all.png"&gt;
+  &lt;meta property="og:image:alt" content="Line drawing of home appliances"&gt;
+  &lt;meta name="twitter:card" content="summary_large_image"&gt;
+  &lt;link rel="icon" href="/favicon.svg" type="image/svg+xml"&gt;
+  &lt;link rel="canonical" href="https://example.com/"&gt;
+  &lt;link rel="alternate" href="https://example.com/fr/" hreflang="fr-FR"&gt;
+  &lt;link rel="manifest" href="/manifest.webmanifest"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Head-only page&lt;/h1&gt;
+  &lt;p&gt;Heads are invisible. This script reads them back:&lt;/p&gt;
+  &lt;ul id="m"&gt;&lt;/ul&gt;
+  &lt;script&gt;
+    var ul = document.getElementById('m');
+    document.querySelectorAll('head meta, head link').forEach(function(el){
+      var li = document.createElement('li');
+      li.textContent = el.tagName.toLowerCase() + ' ' + (el.getAttribute('name') || el.getAttribute('property') || el.getAttribute('rel') || 'charset');
+      ul.appendChild(li);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Dark-mode theme colour</b>Two <code>theme-color</code> tags with <code>media="(prefers-color-scheme: light)"</code> and <code>dark</code> give the browser chrome the right colour in each mode. Same trick works for <code>color-scheme</code>.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Structured data</b>A <code>&lt;script type="application/ld+json"&gt;</code> block with schema.org data lets search engines show rich results. It is metadata in the head (or body) that is never rendered.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Wrong stylesheet attribute</b><code>&lt;link rel="stylesheet" src="styles.css"&gt;</code> is a typo that appears in the sample: <code>&lt;link&gt;</code> takes <code>href</code>, not <code>src</code>. Nothing loads and nothing errors.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Blocking your own page</b>A leftover <code>&lt;meta name="robots" content="noindex"&gt;</code> from staging is the classic reason a live site vanishes from search. Check it before launch.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the sample uses <code>&lt;link rel="stylesheet" src=...&gt;</code> (must be <code>href</code>), <code>&lt;meta ... content="#226DAA'"&gt;</code> and <code>&lt;meta name='"robots"</code> quote typos, <code>og:image</code> on <code>http://</code> while the text says https, and a <code>canonical</code> for a different domain than the rest of the site. <code>refresh</code> is missing <code>url=</code>. <code>media="orientation: portrait"</code> needs parentheses. The notes omit <code>twitter:card</code>, the required Twitter/X tag; <code>twitter:image:src</code> is an old name for <code>twitter:image</code>. "Twitter's Card Validator" is no longer the main tool. <code>apple-mobile-web-app-capable</code> is the legacy name of <code>mobile-web-app-capable</code>. The "charset was created because developers mistyped the content attribute" story is folklore, so it is not repeated. The claims that Firefox and Opera use the description as the bookmark text are unreliable and dropped. Removed: MLW and Zoolander jokes, personal and conference social handles, PerfMatters examples, CodePen-style screenshots, the quiz.</div>
+
+<div class="practice" data-id="m14"></div>
+<div class="quiz" data-id="m14"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Links | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Anchors, hrefs, rel, targets">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m06">
+<header class="hero"><div class="in"><div class="kicker">Part 2 &middot; Module 06</div><h1>Links</h1><p>Anchors, hrefs, rel, targets</p></div></header>
+<main>
+<p>The <code>&lt;a&gt;</code> (anchor) element plus its <code>href</code> attribute makes a <b>hyperlink</b>: a connection between the current document and another resource. Links can also be made by <code>&lt;area&gt;</code>, <code>&lt;link&gt;</code> and forms.</p>
+
+<h2>1. The href attribute</h2>
+<p><code>href</code> is technically optional, but it is what turns <code>&lt;a&gt;</code> into a link. Without it, <code>&lt;a&gt;</code> is just a placeholder: not focusable, not announced as a link.</p>
+<pre><code>&lt;a href="https://example.com/"&gt;Absolute URL (protocol + domain)&lt;/a&gt;
+&lt;a href="../attributes/"&gt;Relative URL (relative to this file)&lt;/a&gt;
+&lt;a href="#teachers"&gt;Fragment: element with id="teachers"&lt;/a&gt;
+&lt;a href="https://example.com/#teachers"&gt;Absolute URL + fragment&lt;/a&gt;
+&lt;a href="mailto:hal@example.com"&gt;Email Hal&lt;/a&gt;
+&lt;a href="tel:+18005551212"&gt;Call us&lt;/a&gt;</code></pre>
+<table class="t"><tr><th>Kind</th><th>Notes</th></tr>
+<tr><td>Absolute</td><td>Works anywhere. <code>//example.com</code> (protocol-relative) is legacy: just use <code>https://</code></td></tr>
+<tr><td>Relative</td><td>No protocol or domain; resolved against the current page (or <code>&lt;base&gt;</code>)</td></tr>
+<tr><td>Fragment <code>#id</code></td><td>Scrolls to the matching id. The fragment is <b>not</b> sent to the server. <code>#top</code> or <code>#</code> (empty) scroll to page top if no element has that id</td></tr>
+<tr><td><code>mailto:</code></td><td>Opens the mail app. Add <code>?subject=...&amp;body=...</code> (percent-encoded). Address may be omitted for "tell a friend" links</td></tr>
+<tr><td><code>tel:</code></td><td>Opens a dialler or call app; use international format <code>+1...</code></td></tr></table>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">MATH: link kinds</b><b>M</b>ice <b>A</b>lways <b>T</b>ickle <b>H</b>ippos = <b>M</b>ailto, <b>A</b>nchor (<code>#id</code>), <b>T</b>el, <b>H</b>ttp(s).</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Auto-label links with CSS</b><code>a[href^="mailto:"]::before</code>, <code>a[href^="tel:"]</code>, <code>a[href$=".pdf"]::after</code> and <code>a[href^="http"]:not([href*="mysite.com"])</code> can add icons or "(PDF)" labels with no extra markup.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Tell-a-friend link</b><code>mailto:?subject=Join%20me&amp;body=...</code> with no address lets visitors choose recipients. Build the string with <code>encodeURIComponent()</code> so spaces and <code>&amp;</code> survive.</aside>
+
+<h2>2. download</h2>
+<p>Add <code>download="suggested-name.pdf"</code> when <code>href</code> points to a file you want saved rather than opened. It also works with <code>blob:</code> and <code>data:</code> URLs. It is honoured only for same-origin (or blob/data) URLs.</p>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Cross-origin download</b><code>download</code> is ignored for files on another origin: the browser simply navigates to them. Serve a <code>Content-Disposition: attachment</code> header instead.</aside>
+
+<h2>3. target: where it opens</h2>
+<table class="t"><tr><th>Value</th><th>Result</th></tr>
+<tr><td><code>_self</code> (default)</td><td>Current tab or frame</td></tr>
+<tr><td><code>_blank</code></td><td>New, unnamed tab on <b>every</b> click</td></tr>
+<tr><td><code>_parent</code> / <code>_top</code></td><td>Parent frame / top-most frame (same as <code>_self</code> if not nested)</td></tr>
+<tr><td>any name, e.g. <code>reg</code></td><td>Opens a tab with that name once, then reuses it</td></tr></table>
+<p>Keywords are case-insensitive; custom names are case-sensitive. Clicking <code>target="_blank"</code> fifteen times gives fifteen tabs; <code>target="reg"</code> gives one.</p>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">_blank everywhere</b>New tabs break the Back button and surprise users. Use <code>_blank</code> sparingly, say so in the link text, and prefer a named target if repeat clicks are likely.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Pair it with rel</b><code>&lt;a href="..." target="_blank" rel="noopener noreferrer"&gt;</code>. Modern browsers treat <code>_blank</code> as <code>noopener</code> already; adding it costs nothing and protects older ones. <code>noreferrer</code> also hides the Referer header.</aside>
+
+<h2>4. rel, hreflang, type, ping</h2>
+<table class="t"><tr><th>Attribute</th><th>Use</th></tr>
+<tr><td><code>rel="nofollow"</code></td><td>Asks search spiders not to follow/endorse the link (<code>ugc</code>, <code>sponsored</code> are finer-grained)</td></tr>
+<tr><td><code>rel="external"</code></td><td>Link leaves the current site</td></tr>
+<tr><td><code>rel="prev"</code> / <code>"next"</code></td><td>Neighbours in a series</td></tr>
+<tr><td><code>rel="alternate"</code></td><td>Another version: translation, feed, other format</td></tr>
+<tr><td><code>rel="help"</code></td><td>Context help. Do not use just to get the help cursor; use CSS <code>cursor</code></td></tr>
+<tr><td><code>hreflang</code></td><td>Language of the linked document</td></tr>
+<tr><td><code>lang</code> (on the link)</td><td>Language of the link <i>text</i> if it differs from the page</td></tr>
+<tr><td><code>type</code></td><td>Advisory MIME type, e.g. <code>application/pdf</code></td></tr>
+<tr><td><code>ping</code></td><td>HTTPS URLs notified (POST, body <code>PING</code>) on click. Not all browsers enable it</td></tr></table>
+<pre><code>&lt;a href="/fr" hreflang="fr-FR" lang="fr-FR" rel="alternate"&gt;atelier d'apprentissage&lt;/a&gt;
+&lt;a href="/fr.pdf" hreflang="fr-FR" lang="fr-FR" rel="alternate" type="application/pdf"&gt;atelier (PDF)&lt;/a&gt;</code></pre>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">HTRD-HTP: the anchor's attributes</b><b>H</b>airy <b>T</b>igers <b>R</b>oar, <b>D</b>ogs <b>H</b>um <b>T</b>unes <b>P</b>olitely = <code>href</code>, <code>target</code>, <code>rel</code>, <code>download</code>, <code>hreflang</code>, <code>type</code>, <code>ping</code>.</aside>
+
+<h2>5. Good links</h2>
+<ul>
+<li>The link content is its accessible name: say where it goes ("Read the 2026 report"), not "click here" or "more".</li>
+<li>If the link is an image, its <code>alt</code> is the link name.</li>
+<li>Do not rely on colour alone: add an underline or another cue, and keep a visible focus style.</li>
+<li>Never nest interactive content (<code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, another <code>&lt;a&gt;</code>) inside a link, or a link inside a <code>&lt;button&gt;</code> or <code>&lt;label&gt;</code>.</li>
+<li>Enter activates a focused link. (Space activates buttons, not links.)</li>
+<li><code>&lt;a&gt;</code> may wrap block content (a whole card). <code>document.links</code> lists all <code>a</code> and <code>area</code> elements that have <code>href</code>.</li>
+</ul>
+<textarea class="try-src" data-title="Smart link styling" hidden>&lt;style&gt;
+body{font-family:sans-serif;line-height:2}
+a{color:#A51C30;text-decoration:underline}
+a:focus-visible{outline:3px solid #d4a017;outline-offset:2px}
+a[href^="mailto:"]::before{content:"✉ "}
+a[href^="tel:"]::before{content:"☎ "}
+a[href$=".pdf"]::after{content:" (PDF)";font-size:.8em}
+a:not([href]){color:#999;text-decoration:none}
+:target{background:#fff3b0}
+&lt;/style&gt;
+&lt;p&gt;&lt;a href="mailto:hal@example.com"&gt;Email Hal&lt;/a&gt; · &lt;a href="tel:+18005551212"&gt;Call us&lt;/a&gt; · &lt;a href="/brochure.pdf"&gt;Brochure&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="#end"&gt;Jump to the end&lt;/a&gt; · &lt;a&gt;No href: not a link&lt;/a&gt;&lt;/p&gt;
+&lt;p style="margin-top:300px" id="end"&gt;Fragment target (see :target highlight). &lt;a href="#top"&gt;Back to top&lt;/a&gt;&lt;/p&gt;</textarea>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Click here</b>Screen reader users often list all links out of context. "Click here, click here, more" tells them nothing.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">href="#" as a button</b>It scrolls to the top and pollutes history. If it performs an action instead of navigating, use <code>&lt;button&gt;</code>.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Colour-only links</b>Links distinguished only by colour fail accessibility checks. Removing the focus outline fails keyboard users.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> in the notes: <code>rel="alternative"</code> is actually <code>rel="alternate"</code>; <code>type="application/x-pdf"</code> should be <code>application/pdf</code>; <code>tel:8005551212</code> should be international (<code>tel:+1...</code>); the JS example sets <code>a.protocol = 'ftp'</code> but FTP support has been removed from browsers (use <code>https</code>); <code>xlink:href</code> on SVG links is deprecated (SVG 2 uses plain <code>href</code>); <code>ping</code> is disabled by default in some browsers; quote typos such as <code>href="mailto:...'</code>. Removed: web history trivia, SVGOMG and Canvas demos, Jake Archibald references.</div>
+
+<div class="practice" data-id="m06"></div>
+<div class="quiz" data-id="m06"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

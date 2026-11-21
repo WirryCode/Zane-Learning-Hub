@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Images | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="img, alt, srcset, picture, figure">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m09">
+<header class="hero"><div class="in"><div class="kicker">Part 2 &middot; Module 09</div><h1>Images</h1><p>img, alt, srcset, picture, figure</p></div></header>
+<main>
+<p>Images that carry information (content) belong in HTML with <code>&lt;img&gt;</code>. Purely decorative images (gradients, page backgrounds) belong in CSS. This module is a tour of the essentials: <code>src</code>, <code>alt</code>, responsive images and performance attributes.</p>
+
+<h2>1. The two required attributes</h2>
+<pre><code>&lt;img src="images/eve.png" alt="Eve, the probe droid"&gt;</code></pre>
+<ul>
+<li><code>src</code>: the image URL. Without it there is nothing to render.</li>
+<li><code>alt</code>: a text alternative, used by screen readers, search engines, voice assistants, and shown if the image fails to load. It is also valuable in HTML emails where images are often blocked.</li>
+<li><code>&lt;img&gt;</code> is a void element. <code>&lt;img ... /&gt;</code> is XML style; in HTML the slash does nothing.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">SAWH: a good img</b><b>S</b>loths <b>A</b>lways <b>W</b>ear <b>H</b>ats = <code>src</code>, <code>alt</code>, <code>width</code>, <code>height</code>: the four attributes every content image should have.</aside>
+
+<h2>2. Writing good alt text</h2>
+<p>Imagine reading the page aloud to a friend who cannot see it. Convey what the image <i>means in this context</i>, concisely, and nothing the surrounding text already says.</p>
+<table class="t"><tr><th>Situation</th><th>alt</th></tr>
+<tr><td>Dog avatar beside a review</td><td><code>alt="Fluffy"</code></td></tr>
+<tr><td>Dog photo on an adoption page</td><td><code>alt="Fluffy, a tri-colour terrier with a tennis ball in her mouth"</code> (details not in the page text)</td></tr>
+<tr><td>Icon (magnifier, house, floppy disk)</td><td>The <b>meaning</b>: <code>alt="Search"</code>, <code>alt="Home"</code>, <code>alt="Save"</code></td></tr>
+<tr><td>Chart or screenshot</td><td>What you learn from it, not its appearance</td></tr>
+<tr><td>Purely decorative, or repeats nearby text</td><td><code>alt=""</code> (empty, but present)</td></tr></table>
+<ul>
+<li>Do not start with "image of" or "photo of": the <code>&lt;img&gt;</code> role already says so (unless the medium matters, e.g. "oil painting").</li>
+<li>Match the tone of the site. Keep it short and precise.</li>
+<li>Empty <code>alt=""</code> tells assistive tech to skip the image. A <b>missing</b> <code>alt</code> is worse: many screen readers read out the file name.</li>
+<li>If you use non-standard icons, add a visible legend: do not make icons the only way to understand the UI.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">CATS: alt text checklist</b><b>C</b>ontext first, <b>A</b>void "image of", <b>T</b>erse, <b>S</b>kip what nearby text already says.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Same alt everywhere</b>Copying one description to every use of an image. The right alt depends on <i>why</i> the image is on that page.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">alt for a decorative image</b>A swirl or divider with <code>alt="decorative swirl"</code> makes screen readers announce clutter. Use <code>alt=""</code>, or better, put it in CSS.</aside>
+
+<h2>3. Responsive images</h2>
+<p>Do not send a phone a desktop-sized file, but do give high-density screens sharper ones. Two tools:</p>
+<pre><code>&lt;!-- A) srcset + sizes: same picture, different file sizes --&gt;
+&lt;img src="eve-400.jpg" alt="Eve"
+     srcset="eve-400.jpg 400w, eve-800.jpg 800w"
+     sizes="(max-width: 800px) 100vw, 800px"&gt;
+
+&lt;!-- B) picture: art direction and format fallback --&gt;
+&lt;picture&gt;
+  &lt;source srcset="eve.avif" type="image/avif"&gt;
+  &lt;source srcset="eve-wide.jpg" media="(min-width: 800px)"&gt;
+  &lt;img src="eve.jpg" alt="Eve"&gt;
+&lt;/picture&gt;</code></pre>
+<table class="t"><tr><th></th><th><code>srcset</code> on <code>&lt;img&gt;</code></th><th><code>&lt;picture&gt;</code></th></tr>
+<tr><td>Goal</td><td>Resolution switching: browser picks the best file</td><td>Art direction (different crops) or format choice</td></tr>
+<tr><td>Who decides</td><td>The browser (hints only)</td><td>The first matching <code>&lt;source&gt;</code> wins</td></tr>
+<tr><td>Descriptors</td><td><code>w</code> (needs <code>sizes</code>) or <code>x</code> (pixel density)</td><td><code>media</code>, <code>type</code>, plus <code>srcset</code>/<code>sizes</code></td></tr></table>
+<ul>
+<li>One <code>srcset</code> attribute per <code>&lt;img&gt;</code>, holding a comma-separated list of "URL descriptor" pairs.</li>
+<li><code>sizes</code> describes how wide the image will be displayed, so the browser can choose among <code>w</code> candidates. If omitted it assumes <code>100vw</code>.</li>
+<li><code>&lt;picture&gt;</code> takes any number of <code>&lt;source&gt;</code> elements and exactly one required <code>&lt;img&gt;</code>, the fallback and the element that carries <code>alt</code>.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">PAF: picture vs srcset</b><b>P</b>enguins <b>A</b>dore <b>F</b>ish = <b>P</b>icture is for <b>A</b>rt direction and <b>F</b>ormats. <code>srcset</code> is for sizes and resolution.</aside>
+
+<h2>4. Performance attributes</h2>
+<ul>
+<li><b><code>width</code> and <code>height</code></b>: unitless pixel values give the browser the aspect ratio, so space is reserved before the image loads and the page does not jump (layout shift). CSS such as <code>img { max-width: 100%; height: auto }</code> still makes the image responsive.</li>
+<li><b><code>loading="lazy"</code></b> defers off-screen images until they are near the viewport. Default is <code>eager</code>. If JavaScript is disabled, images load eagerly.</li>
+<li>Also available: <code>decoding="async"</code>, <code>fetchpriority="high"</code>, <code>crossorigin</code>, <code>referrerpolicy</code>.</li>
+<li><code>ismap</code> (server-side image maps) is rare; the <code>&lt;img&gt;</code> must sit inside a link. <code>&lt;input type="image"&gt;</code> sends click <code>x</code> and <code>y</code> automatically.</li>
+</ul>
+<textarea class="try-src" data-title="Responsive image sandbox" hidden>&lt;style&gt;body{font-family:sans-serif} img{max-width:100%;height:auto;border:2px solid #A51C30}&lt;/style&gt;
+&lt;p&gt;Resize this pane: the bar below is an inline SVG used as the image.&lt;/p&gt;
+&lt;img alt="A red bar with the text 400 by 100"
+     width="400" height="100" loading="lazy"
+     src="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' width='400' height='100'&gt;&lt;rect width='400' height='100' fill='%23A51C30'/&gt;&lt;text x='200' y='58' fill='white' font-size='28' text-anchor='middle'&gt;400 x 100&lt;/text&gt;&lt;/svg&gt;"&gt;
+&lt;figure style="margin:12px 0"&gt;
+  &lt;img alt="" width="120" height="60"
+       src="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' width='120' height='60'&gt;&lt;rect width='120' height='60' fill='%23d4a017'/&gt;&lt;/svg&gt;"&gt;
+  &lt;figcaption&gt;A gold swatch. The caption is the first or last child of figure.&lt;/figcaption&gt;
+&lt;/figure&gt;</textarea>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Mind the missing size</b>Add <code>width</code> and <code>height</code> to every <code>&lt;img&gt;</code> even when CSS resizes it. It is the cheapest layout-shift fix there is.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Format fallback for free</b><code>&lt;picture&gt;</code> with <code>type="image/avif"</code> then <code>type="image/webp"</code> then a JPEG <code>&lt;img&gt;</code> lets modern browsers pick the smallest file you ship.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Lazy-loading the hero image</b><code>loading="lazy"</code> on the top banner delays your biggest visible image. Lazy-load below-the-fold images only.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Text baked into images</b>A banner image containing words fails zoom, translation and screen readers unless the alt repeats every word. Use real text over the image.</aside>
+
+<h2>5. figure and figcaption</h2>
+<p><code>&lt;figure&gt;</code> wraps self-contained content, an image, code, a quote or a diagram, with an optional <code>&lt;figcaption&gt;</code>. The caption must be the <b>first or last</b> child of the figure.</p>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say "the <code>lazy</code> attribute enables lazy loading": it is <code>loading="lazy"</code>. They say a width-based <code>srcset</code> needs a <code>sizes</code> entry for each option except the last: <code>sizes</code> actually lists display-width conditions (the last has no condition), and defaults to <code>100vw</code> if absent. <code>srcset</code> is also used by <code>&lt;link&gt;</code> as <code>imagesrcset</code>. <code>&lt;source&gt;</code>'s <code>media</code> is its own attribute, not a part of <code>srcset</code>. <code>fetchpriority</code> is no longer Blink-only. <code>role="img"</code> on SVG <code>&lt;img&gt;</code> is a legacy VoiceOver workaround, and <code>role="none"</code> beside <code>alt=""</code> is redundant. <code>&lt;input type="image'&gt;</code> and <code>alt="Vaccuum'</code> have quote typos. Removed: site-specific page walkthroughs, joke alt-text examples, Learn-course plugs.</div>
+
+<div class="practice" data-id="m09"></div>
+<div class="quiz" data-id="m09"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

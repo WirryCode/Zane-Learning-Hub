@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Audio &amp; Video | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Media elements, tracks, captions">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m15">
+<header class="hero"><div class="in"><div class="kicker">Part 4 &middot; Module 15</div><h1>Audio &amp; Video</h1><p>Media elements, tracks, captions</p></div></header>
+<main>
+<p>HTML can play sound and video with no plugin at all. <code>&lt;audio&gt;</code> and <code>&lt;video&gt;</code> embed a media player, either from a single <code>src</code> or from a list of <code>&lt;source&gt;</code> suggestions, and <code>&lt;track&gt;</code> adds timed text (subtitles, captions, descriptions). This module covers the markup, the attributes that matter, and how to keep media accessible.</p>
+
+<h2>1. The two elements</h2>
+<ul>
+<li><code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code> share one interface, <code>HTMLMediaElement</code>. <code>&lt;video&gt;</code> adds <code>width</code>, <code>height</code> and <code>poster</code>; <code>&lt;audio&gt;</code> has no visual area, so it has none of those.</li>
+<li><code>&lt;video&gt;</code> can play sound files, but use <code>&lt;audio&gt;</code> for sound-only media.</li>
+<li>The closing tag is <b>required</b>, even when empty. Content between the tags is <b>fallback</b>, shown only by a browser that does not support the element. That is almost never today, so also put a visible link to the file or a transcript <i>outside</i> the player.</li>
+<li>Children go in this order: <code>&lt;source&gt;</code> elements, <code>&lt;track&gt;</code> elements, then fallback content.</li>
+</ul>
+<pre><code>&lt;video src="videos/machines.webm" poster="images/machine.jpg" width="640" height="360" controls&gt;
+  &lt;p&gt;Your browser cannot play this. &lt;a href="videos/machines.webm"&gt;Download the video&lt;/a&gt;.&lt;/p&gt;
+&lt;/video&gt;</code></pre>
+
+<h2>2. Several sources and codecs</h2>
+<p>Without a <code>src</code> on the media element, add one or more <code>&lt;source&gt;</code> children. The browser takes the <b>first</b> one it can play, top to bottom.</p>
+<pre><code>&lt;video controls poster="images/machine.jpg" width="640" height="360"&gt;
+  &lt;source src="videos/machines.webm" type="video/webm; codecs=vp9,opus"&gt;
+  &lt;source src="videos/machines.mp4"  type="video/mp4"&gt;
+  &lt;track label="English" kind="subtitles" srclang="en" src="vtt/subtitles-en.vtt" default&gt;
+  &lt;track label="Français" kind="subtitles" srclang="fr" src="vtt/subtitles-fr.vtt"&gt;
+  &lt;p&gt;Watch the &lt;a href="https://example.com/video"&gt;video on our site&lt;/a&gt;.&lt;/p&gt;
+&lt;/video&gt;</code></pre>
+<ul>
+<li><code>type</code> is the media (MIME) type. It stops the browser downloading a file it cannot decode. Add a <code>codecs</code> parameter to be exact (<code>video/webm;codecs=vp8,vorbis</code>, <code>video/mp4; codecs=avc1.4d002a</code> is H.264 Main Profile level 4.2). Put the most efficient format first and the most compatible last.</li>
+<li><code>&lt;source&gt;</code> may also carry <code>media</code> (a media query), like <code>&lt;picture&gt;</code>.</li>
+<li>Check support from JavaScript with <code>el.canPlayType('video/webm')</code>: it returns <code>""</code>, <code>"maybe"</code> or <code>"probably"</code>.</li>
+</ul>
+
+<h2>3. Attributes that matter</h2>
+<table class="t"><tr><th>Attribute</th><th>What it does</th></tr>
+<tr><td><code>controls</code></td><td>Shows the browser's player UI (play, volume, seek, fullscreen). Boolean. Without it, and without script, users cannot play the media at all.</td></tr>
+<tr><td><code>autoplay</code></td><td>Starts playing by itself. Browsers usually ignore it unless the media is <code>muted</code> (or the user has interacted with the site).</td></tr>
+<tr><td><code>muted</code></td><td>Starts silent. In HTML it only sets the <b>initial</b> state; in script, read and write <code>el.muted</code>.</td></tr>
+<tr><td><code>loop</code></td><td>Restarts when it ends, forever.</td></tr>
+<tr><td><code>preload</code></td><td>A hint: <code>none</code> (fetch nothing), <code>metadata</code> (duration and dimensions only), <code>auto</code> (browser decides). The browser may ignore it.</td></tr>
+<tr><td><code>poster</code></td><td>(<code>&lt;video&gt;</code> only) An image shown until playback starts. It is not shown again after pausing.</td></tr>
+<tr><td><code>playsinline</code></td><td>Plays inside the page instead of forcing fullscreen on iPhones.</td></tr>
+<tr><td><code>width</code>, <code>height</code></td><td>Unitless pixels. They reserve space so the page does not jump when the video loads.</td></tr>
+<tr><td><code>crossorigin</code></td><td>Needed when media or track files come from another origin and you use them from script or as tracks.</td></tr></table>
+<ul>
+<li>Match the poster's aspect ratio to the video's; a difference causes a reflow and repaint when the video loads.</li>
+<li>Autoplaying media is generally a bad experience, even muted with controls.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">PALM: background video recipe</b><b>P</b>enguins <b>A</b>lways <b>L</b>ick <b>M</b>angoes = <code>playsinline</code>, <code>autoplay</code>, <code>loop</code>, <code>muted</code>: the four attributes of a silent, looping background clip.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Writing mute instead of muted</b>The attribute is <code>muted</code>. <code>&lt;video mute&gt;</code> is an unknown attribute that does nothing, and the video autoplays loudly (or is blocked). The same goes for <code>controls</code>: it is a plain boolean, not "booleancontrols".</aside>
+
+<h2>4. Tracks: timed text</h2>
+<p><code>&lt;track&gt;</code> points to a WebVTT (<code>.vtt</code>) file. The file must be same-origin unless <code>crossorigin</code> is set, and should be served as <code>text/vtt</code>.</p>
+<pre><code>WEBVTT
+
+00:00:01.000 --&gt; 00:00:03.500
+Welcome to the machine workshop.
+
+00:00:04.000 --&gt; 00:00:06.000
+[dishwasher beeps]</code></pre>
+<table class="t"><tr><th><code>kind</code></th><th>Contains</th></tr>
+<tr><td><code>subtitles</code></td><td>Translation or transcription of dialogue. Needs <code>srclang</code>.</td></tr>
+<tr><td><code>captions</code></td><td>Dialogue <b>plus</b> sound effects and speaker cues, for people who cannot hear the audio.</td></tr>
+<tr><td><code>descriptions</code></td><td>Text description of the visuals, for people who cannot see the video.</td></tr>
+<tr><td><code>chapters</code></td><td>Titles for navigating the timeline.</td></tr>
+<tr><td><code>metadata</code></td><td>Data for scripts. Never shown.</td></tr></table>
+<ul>
+<li><code>label</code> is the name shown in the player's menu. Mark one track <code>default</code> to switch it on automatically.</li>
+<li>Style the displayed text with the <code>::cue</code> pseudo-element (and <code>::cue(b)</code> to match tags inside the cue).</li>
+<li>Captions help far more than the deaf community: noisy trains, no headphones, a quiet office, learners of a language.</li>
+<li>Browsers display tracks on <code>&lt;video&gt;</code>. A plain <code>&lt;audio&gt;</code> has no screen, so provide a <b>transcript</b> on the page (or show cues yourself with script, as in the lab below).</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">SCDCM: the five track kinds</b><b>S</b>illy <b>C</b>ows <b>D</b>ance, <b>C</b>hickens <b>M</b>eow = <b>S</b>ubtitles, <b>C</b>aptions, <b>D</b>escriptions, <b>C</b>hapters, <b>M</b>etadata.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">kind="caption"</b>The value is plural: <code>captions</code> (and <code>descriptions</code>). A misspelt <code>kind</code> falls back to <code>metadata</code>, so your text silently never shows.</aside>
+
+<h2>5. Background video and accessibility</h2>
+<p>Design teams love a silent, looping video behind the hero text. Do it like this, and treat it as decoration only:</p>
+<pre><code>&lt;video playsinline autoplay loop muted poster="images/machine.jpg" role="none"&gt;
+  &lt;source src="videos/machines.webm" type="video/webm"&gt;
+  &lt;source src="videos/machines.mp4" type="video/mp4"&gt;
+&lt;/video&gt;</code></pre>
+<ul>
+<li><code>role="none"</code> and no fallback: it is purely decorative. Never convey information in a background video.</li>
+<li>Strip the audio track from the file; a muted video that still ships audio wastes bandwidth.</li>
+<li>WCAG 2.2.2 (Pause, Stop, Hide): anything that moves automatically for more than <b>five seconds</b> needs a way to pause it. A <code>loop</code> never stops, so always provide a pause control.</li>
+<li>Respect <code>prefers-reduced-motion</code>: pause or hide the video for users who ask for less motion.</li>
+</ul>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Autoplaying looped video with no way to stop it</b>Fails WCAG 2.2.2, distracts people with attention or vestibular conditions, and drains mobile data. Provide a visible pause button, honour <code>prefers-reduced-motion</code>, and keep the file small.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Spoken content with no captions</b>A video with dialogue and no captions or transcript excludes deaf users and fails WCAG 1.2. An audio-only podcast needs a transcript.</aside>
+
+<h2>6. Custom controls with JavaScript</h2>
+<p>Keep <code>controls</code> in the HTML so the player still works if JavaScript fails. Only once your own button exists, remove it. Use <code>play()</code>, <code>pause()</code>, the <code>paused</code> property, and keep the button's text and <code>aria-controls</code> honest.</p>
+<pre><code>&lt;button id="playPause" aria-controls="song"
+        data-play-text="Play audio" data-pause-text="Pause audio"&gt;Play audio&lt;/button&gt;
+&lt;script&gt;
+const btn = document.getElementById('playPause');
+btn.addEventListener('click', () =&gt; {
+  const media = document.getElementById(btn.getAttribute('aria-controls'));
+  if (media.paused) { media.play(); btn.textContent = btn.dataset.pauseText; }
+  else { media.pause(); btn.textContent = btn.dataset.playText; }
+});
+&lt;/script&gt;</code></pre>
+<ul>
+<li><code>play()</code> returns a <b>Promise</b>. If the browser blocks playback it rejects with <code>NotAllowedError</code>, so write <code>media.play().catch(...)</code>.</li>
+<li>Useful members: <code>currentTime</code>, <code>duration</code>, <code>volume</code>, <code>muted</code>, <code>ended</code>, <code>playbackRate</code>, and the events <code>play</code>, <code>pause</code>, <code>ended</code>, <code>timeupdate</code>, <code>loadedmetadata</code>.</li>
+<li>Related APIs: <code>TextTrack</code> (cues), Media Capture and Streams plus <code>MediaDevices</code> (microphone, camera, screen recording), and the Web Audio API (processing live or recorded sound).</li>
+</ul>
+<textarea class="try-src" data-title="Audio lab: custom controls, muted and cues" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px} button{padding:6px 12px;font:inherit;margin:4px 4px 4px 0}
+ pre{background:#eee;padding:6px;font-size:12px;white-space:pre-wrap} #cue{font-size:18px;min-height:1.6em;background:#fffbe0;padding:6px}
+&lt;/style&gt;
+&lt;p&gt;A 3-second tone is generated in the page (no files). Press Play.&lt;/p&gt;
+&lt;audio id="a" controls&gt;&lt;/audio&gt;
+&lt;p&gt;&lt;button id="pp" aria-controls="a" data-play-text="Play audio" data-pause-text="Pause audio"&gt;Play audio&lt;/button&gt;
+&lt;button id="mu" aria-controls="a" aria-pressed="false"&gt;Mute&lt;/button&gt;
+&lt;label&gt;&lt;input type="checkbox" id="ctl" checked&gt; native controls&lt;/label&gt;&lt;/p&gt;
+&lt;div id="cue" aria-live="polite"&gt;(captions appear here)&lt;/div&gt;
+&lt;pre id="info"&gt;&lt;/pre&gt;
+&lt;script&gt;
+ function wav(sec){var r=8000,n=r*sec,b=new ArrayBuffer(44+n),v=new DataView(b);
+  function s(o,t){for(var i=0;i&lt;t.length;i++)v.setUint8(o+i,t.charCodeAt(i));}
+  s(0,'RIFF');v.setUint32(4,36+n,true);s(8,'WAVE');s(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,1,true);v.setUint32(24,r,true);v.setUint32(28,r,true);v.setUint16(32,1,true);v.setUint16(34,8,true);
+  s(36,'data');v.setUint32(40,n,true);
+  for(var i=0;i&lt;n;i++)v.setUint8(44+i,128+Math.round(50*Math.sin(2*Math.PI*440*i/r)));
+  return new Blob([b],{type:'audio/wav'});}
+ var a=document.getElementById('a'), pp=document.getElementById('pp'), mu=document.getElementById('mu');
+ a.src=URL.createObjectURL(wav(3));
+ /* captions without a .vtt file: build the track in script */
+ var t=a.addTextTrack('captions','English','en'); t.mode='showing';
+ t.addCue(new VTTCue(0,1,'[tone starts]')); t.addCue(new VTTCue(1,2,'A steady 440 Hz note.')); t.addCue(new VTTCue(2,3,'[tone ends]'));
+ t.oncuechange=function(){var c=t.activeCues; document.getElementById('cue').textContent=c.length?c[0].text:'(silence)';};
+ pp.onclick=function(){ if(a.paused){a.play().catch(function(e){info.textContent='play() rejected: '+e.name;}); pp.textContent=pp.dataset.pauseText;} else {a.pause(); pp.textContent=pp.dataset.playText;} };
+ a.onended=function(){pp.textContent=pp.dataset.playText;};
+ mu.onclick=function(){a.muted=!a.muted; mu.textContent=a.muted?'Unmute':'Mute'; mu.setAttribute('aria-pressed',a.muted);};
+ document.getElementById('ctl').onchange=function(){a.controls=this.checked;};
+ var info=document.getElementById('info');
+ function show(){info.textContent='paused: '+a.paused+'\nmuted: '+a.muted+'\ncurrentTime: '+a.currentTime.toFixed(2)+' / duration: '+(isFinite(a.duration)?a.duration.toFixed(2):'?')+
+  '\ncanPlayType(audio/mpeg): "'+a.canPlayType('audio/mpeg')+'"  (audio/ogg): "'+a.canPlayType('audio/ogg')+'"  (audio/wav): "'+a.canPlayType('audio/wav')+'"';}
+ ['timeupdate','play','pause','loadedmetadata','volumechange'].forEach(function(n){a.addEventListener(n,show);}); show();
+&lt;/script&gt;</textarea>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Cheap and polite media</b><code>preload="metadata"</code> loads only the duration; add <code>#t=10,20</code> to a <code>src</code> to play just seconds 10 to 20; <code>controlslist="nodownload"</code> hides the download item; <code>disablepictureinpicture</code> turns off PiP. For a decorative clip use <code>object-fit: cover</code> and put the video behind text with CSS.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Catch the autoplay block</b><code>video.play()</code> returns a Promise: <code>video.play().catch(() =&gt; showPlayButton())</code>. If autoplay is refused, show a visible Play button instead of leaving a dead frame.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Poster of a different shape</b>A 4:3 poster on a 16:9 video makes the box resize when the video loads, shifting the page. Match the ratios and set <code>width</code> and <code>height</code>.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say <code>booleancontrols</code> (typo for the boolean attribute <code>controls</code>), <code>mute</code> (the attribute is <code>muted</code>), <code>kind="caption"</code> and <code>kind="description"</code> (plural: <code>captions</code>, <code>descriptions</code>) and list the fifth track kind as "other metadata" (it is just <code>metadata</code>). They say <code>poster</code> is "an image if the browser doesn't support video" in the quiz: it is the image shown before playback. <code>&lt;track lang="fr-fr"&gt;</code> is invalid: <code>&lt;track&gt;</code> uses <code>srclang</code>. Mismatched quotes (<code>poster="images/machine.jpg'</code>, <code>type="video/webm'</code>) fixed. Added: the fallback-content reality, <code>canPlayType</code>, <code>play()</code> as a Promise, <code>muted</code> attribute vs property, <code>prefers-reduced-motion</code>, WCAG 2.2.2, <code>descriptions</code> for non-screen devices, audio needing a transcript. Removed: Jake Archibald codec link, "learn accessibility" plugs, CodePen/quiz text.</div>
+
+<div class="practice" data-id="m15"></div>
+<div class="quiz" data-id="m15"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

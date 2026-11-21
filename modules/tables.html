@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Tables | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Structure, headers, captions, accessibility">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m10">
+<header class="hero"><div class="in"><div class="kicker">Part 3 &middot; Module 10</div><h1>Tables</h1><p>Structure, headers, captions, accessibility</p></div></header>
+<main>
+<p>A <code>&lt;table&gt;</code> shows <b>tabular data</b>: information that is compared, sorted, calculated or cross-referenced in rows and columns. A grid of thumbnails is not tabular data (use a list and CSS grid). Never use a table for page layout.</p>
+
+<h2>1. The parts of a table, in order</h2>
+<p>Every child is optional, but the order is fixed. The only two you should treat as required in practice are <code>&lt;table&gt;</code> itself and a <code>&lt;caption&gt;</code>.</p>
+<pre><code>&lt;table&gt;
+  &lt;caption&gt;Workshop students&lt;/caption&gt;
+  &lt;colgroup&gt;&lt;col&gt;&lt;col span="2"&gt;&lt;/colgroup&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th scope="col"&gt;Year&lt;/th&gt;&lt;th scope="col"&gt;Name&lt;/th&gt;&lt;th scope="col"&gt;Grade&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;td&gt;1956&lt;/td&gt;&lt;th scope="row"&gt;Lou Minious&lt;/th&gt;&lt;td&gt;A&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot&gt;&lt;tr&gt;&lt;td colspan="3"&gt;End of list&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;</code></pre>
+<table class="t"><tr><th>Element</th><th>Role</th><th>Notes</th></tr>
+<tr><td><code>&lt;caption&gt;</code></td><td>The table's visible title and accessible name</td><td>First child. Move it with CSS <code>caption-side</code>, not the old <code>align</code> attribute</td></tr>
+<tr><td><code>&lt;colgroup&gt;</code> / <code>&lt;col&gt;</code></td><td>Styling hooks for whole columns</td><td>No semantics. Only a few properties work (border, background, width, visibility)</td></tr>
+<tr><td><code>&lt;thead&gt;</code> <code>&lt;tbody&gt;</code> <code>&lt;tfoot&gt;</code></td><td>Row groups, implicit role <code>rowgroup</code></td><td>Zero or more of each. Loose rows are wrapped in an implicit <code>&lt;tbody&gt;</code></td></tr>
+<tr><td><code>&lt;tr&gt;</code></td><td>One row</td><td>Contains <code>&lt;th&gt;</code> and <code>&lt;td&gt;</code> cells</td></tr>
+<tr><td><code>&lt;th&gt;</code></td><td>Header cell (role <code>columnheader</code> or <code>rowheader</code>)</td><td>Association survives scrolling out of view</td></tr>
+<tr><td><code>&lt;td&gt;</code></td><td>Data cell</td><td>Gets its meaning from its headers</td></tr></table>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">CCTTT: the table child order</b><b>C</b>ats <b>C</b>hase <b>T</b>iny <b>T</b>in <b>T</b>oys = <code>caption</code>, <code>colgroup</code>, <code>thead</code>, <code>tbody</code>, <code>tfoot</code>.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Content outside a cell</b>Putting text or a <code>&lt;div&gt;</code> directly inside <code>&lt;table&gt;</code> or <code>&lt;tr&gt;</code> is invalid. The parser throws it out in front of the table. Content lives only in <code>&lt;td&gt;</code> or <code>&lt;th&gt;</code>.</aside>
+
+<h2>2. Naming and describing a table</h2>
+<ul>
+<li><b><code>&lt;caption&gt;</code></b> is the preferred name. It is visible to everyone, so users know the purpose before reading a cell.</li>
+<li><code>aria-label</code> or <code>aria-labelledby</code> on the <code>&lt;table&gt;</code> also give an accessible name, but nothing visible.</li>
+<li>If the table "makes a point", add a short summary. Short: put it in the caption. Longer: summarise in the caption and put the full text in a paragraph linked with <code>aria-describedby</code>, or wrap the table in a <code>&lt;figure&gt;</code> with a <code>&lt;figcaption&gt;</code>.</li>
+<li><code>&lt;tfoot&gt;</code> once had to come right after <code>&lt;thead&gt;</code> in HTML 4. In modern HTML put it last, where a reader expects totals.</li>
+</ul>
+
+<h2>3. Header cells and scope</h2>
+<p>A <code>&lt;th&gt;</code> makes its row or column the header for the data cells. That is how a screen reader announces "1956, Year, Lou Minious" for a single cell. The <code>scope</code> attribute says which direction a header covers:</p>
+<table class="t"><tr><th><code>scope</code></th><th>Meaning</th></tr>
+<tr><td><code>col</code></td><td>Header for the column below</td></tr>
+<tr><td><code>row</code></td><td>Header for the row to its right</td></tr>
+<tr><td><code>colgroup</code> / <code>rowgroup</code></td><td>Header for a group of columns or rows (complex tables)</td></tr>
+<tr><td><code>auto</code> (default)</td><td>The browser works it out from position</td></tr></table>
+<p>Simple tables work with defaults, but writing <code>scope</code> is cheap insurance for assistive technology.</p>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Bold td instead of th</b>Making a header row from <code>&lt;td&gt;</code> cells with bold CSS looks right and means nothing. No header association, nothing for screen readers. Use <code>&lt;th&gt;</code>.</aside>
+
+<h2>4. Merging cells</h2>
+<ul>
+<li><code>colspan="n"</code> merges a cell with the n-1 cells to its right, in the same row.</li>
+<li><code>rowspan="n"</code> merges a cell with the n-1 cells below it, set on the <b>first</b> cell of the merge.</li>
+<li>A merged-over cell must be <b>left out</b> of the markup. Each row must still add up to the same number of columns.</li>
+<li>When one cell has more than one header and <code>scope</code> cannot express it (merged headers, more than two levels), give every data cell a <code>headers</code> attribute: a space-separated list of the header cells' <code>id</code> values. It is valid on <code>&lt;td&gt;</code> and <code>&lt;th&gt;</code>.</li>
+<li>Complex tables confuse everyone, not only screen reader users. Prefer several simple tables.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">CARD: merge directions</b><b>C</b>hickens <b>A</b>lways <b>R</b>ent <b>D</b>inosaurs = <b>C</b>olspan goes <b>A</b>cross, <b>R</b>owspan goes <b>D</b>own.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Colspan miscount</b>If a row has too many or too few cells, the table skews: later cells shift into the wrong columns and every header association is wrong. Count the columns of each row after merging.</aside>
+
+<h2>5. Styling tables</h2>
+<ul>
+<li>Spacing, borders and alignment are CSS: <code>border-collapse</code>, <code>border-spacing</code> (no effect when collapsed), <code>padding</code>, <code>text-align</code>, <code>empty-cells: hide</code> (separate borders only). The old <code>cellpadding</code>, <code>cellspacing</code>, <code>border</code> and <code>align</code> attributes are obsolete.</li>
+<li>Paint order, bottom to top: table, column groups, columns, row groups, rows, then cells on top. <code>&lt;td&gt;</code>/<code>&lt;th&gt;</code> are not descendants of <code>&lt;col&gt;</code>, so they do not inherit its styles, and cell styles win.</li>
+<li>Stripe rows with <code>tbody tr:nth-of-type(odd)</code>. Beware <code>nth-child</code> on cells when some cells are merged: it counts the cells that exist in each row.</li>
+<li>Tables are sized by their content and are <b>not responsive</b> by default.</li>
+<li>If you change <code>display</code> on table elements, add the ARIA roles back (<code>role="table"</code>, <code>row</code>, <code>cell</code>...). Some browsers drop table semantics when display changes.</li>
+</ul>
+<textarea class="try-src" data-title="Build a real table" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px}
+ table{border-collapse:collapse;width:100%}
+ caption{font-weight:bold;text-align:left;padding:6px 0}
+ th,td{border:1px solid #999;padding:6px 8px;text-align:left}
+ thead th{background:#A51C30;color:#fff}
+ tbody tr:nth-of-type(odd){background:rgba(0,0,0,.08)}
+ tfoot td{font-weight:bold}
+&lt;/style&gt;
+&lt;table&gt;
+  &lt;caption&gt;Workshop results, 2026&lt;/caption&gt;
+  &lt;colgroup&gt;&lt;col&gt;&lt;col span="2"&gt;&lt;/colgroup&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th scope="col"&gt;Student&lt;/th&gt;&lt;th scope="col"&gt;Term 1&lt;/th&gt;&lt;th scope="col"&gt;Term 2&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;th scope="row"&gt;HAL&lt;/th&gt;&lt;td&gt;71&lt;/td&gt;&lt;td&gt;80&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;th scope="row"&gt;EVE&lt;/th&gt;&lt;td&gt;88&lt;/td&gt;&lt;td&gt;91&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;th scope="row"&gt;Toasty&lt;/th&gt;&lt;td&gt;40&lt;/td&gt;&lt;td&gt;55&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot&gt;
+    &lt;tr&gt;&lt;th scope="row"&gt;Average&lt;/th&gt;&lt;td&gt;66&lt;/td&gt;&lt;td&gt;75&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;
+&lt;p&gt;Try: change the first header to &lt;code&gt;colspan="2"&lt;/code&gt; and remove one cell. Then break a row on purpose and see the columns skew.&lt;/p&gt;</textarea>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Scrollable table on phones</b>Wrap a wide table in <code>&lt;div role="region" aria-labelledby="cap" tabindex="0" style="overflow-x:auto"&gt;</code> and give the <code>&lt;caption&gt;</code> the id <code>cap</code>. Keyboard users can then focus the region and scroll it, and it keeps a name.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Sticky header</b><code>thead th { position: sticky; top: 0; background: #fff }</code> keeps the header visible while a tall table scrolls. This is why <code>&lt;thead&gt;</code> exists as a styling hook.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Tables for layout</b>A table used for page layout makes screen readers announce rows and columns that mean nothing and breaks on small screens. Use CSS grid or flexbox. If you inherit a layout table, mark it <code>role="none"</code>.</aside>
+
+<h2>6. Choosing the right element</h2>
+<p>If the data needs a spreadsheet to present at a meeting, use a table (students and grades over three terms). If it would suit presentation slides, it is likely a description list (terms and definitions). A recipe's ingredients are a plain list.</p>
+<div class="fix"><b>✎ Notes corrected:</b> the notes' <code>&lt;th scope="row'&amp;gt;Lou Minious&amp;lt;/th&gt;</code> is mangled (mismatched quote, escaped tag); the default <code>scope</code> is <code>auto</code> (the browser infers col or row), not simply col or row; <code>rowgroup</code>/<code>colgroup</code> are valid values and <code>auto</code> was missing; the "tfoot must come before tbody" detail is a legacy HTML 4 rule. Removed: CodePen iframes, the MLW-students walkthrough, the slidedeck link, "Learn CSS" plugs, the quiz.</div>
+
+<div class="practice" data-id="m10"></div>
+<div class="quiz" data-id="m10"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

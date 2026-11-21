@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Template, Slot &amp; Shadow | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Web components basics">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m18">
+<header class="hero"><div class="in"><div class="kicker">Part 4 &middot; Module 18</div><h1>Template, Slot &amp; Shadow</h1><p>Web components basics</p></div></header>
+<main>
+<p>Web components let you build a UI widget once and reuse it like any built-in element. They need JavaScript to define, but no library. The standard has three parts that work together: <b>HTML templates</b> (<code>&lt;template&gt;</code>, <code>&lt;slot&gt;</code>), <b>custom elements</b> (<code>customElements.define</code>) and the <b>shadow DOM</b> (<code>attachShadow</code>). Together they give you self-contained, <b>encapsulated</b>, reusable elements. In this module we build a <code>&lt;star-rating&gt;</code> element.</p>
+
+<h2>1. The template element</h2>
+<ul>
+<li><code>&lt;template&gt;</code> declares a fragment of HTML that is <b>not rendered</b> and is cloned into the page with JavaScript.</li>
+<li>Its content is inert: images do not load, scripts do not run, styles do not apply until the clone is inserted into a live document.</li>
+<li>The children are <b>not</b> children of the <code>&lt;template&gt;</code> in the DOM. They live in a <code>DocumentFragment</code> returned by <code>template.content</code>.</li>
+<li>Appending that content to the page makes it part of the normal, styleable DOM. That alone is not a custom element.</li>
+</ul>
+<pre><code>&lt;template id="star-rating-template"&gt;
+  &lt;form&gt;
+    &lt;fieldset&gt;
+      &lt;legend&gt;Rate your experience:&lt;/legend&gt;
+      &lt;input type="radio" name="rating" value="1" aria-label="1 star" required&gt;
+      &lt;input type="radio" name="rating" value="2" aria-label="2 stars"&gt;
+      &lt;input type="radio" name="rating" value="3" aria-label="3 stars"&gt;
+    &lt;/fieldset&gt;
+    &lt;button type="reset"&gt;Reset&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;
+&lt;script&gt;
+  const tpl = document.getElementById('star-rating-template');
+  document.body.appendChild(tpl.content.cloneNode(true)); // clone, never move the original
+&lt;/script&gt;</code></pre>
+<ul>
+<li><code>cloneNode(true)</code> (deep clone) lets you reuse the template as many times as you like. Appending <code>tpl.content</code> directly <b>moves</b> it, and it is then gone for the next use. <code>document.importNode(tpl.content, true)</code> is the equivalent that also adopts the nodes into the document.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">TCS: the three parts</b><b>T</b>urtles <b>C</b>alculate <b>S</b>ums = <b>T</b>emplate, <b>C</b>ustom element, <b>S</b>hadow DOM.</aside>
+
+<h2>2. The slot element</h2>
+<p>A <code>&lt;slot&gt;</code> is a placeholder inside a shadow tree. Elements you write <i>between the tags of the custom element</i> are inserted into matching slots.</p>
+<ul>
+<li>A <b>named slot</b> (<code>&lt;slot name="legend"&gt;</code>) receives children with a matching <code>slot="legend"</code> attribute. The <code>slot</code> attribute is global and must be on a <b>direct child</b> of the host.</li>
+<li>An unnamed <code>&lt;slot&gt;</code> is the <b>default slot</b>: it receives every child (and text) that has no <code>slot</code> attribute.</li>
+<li>Content inside the <code>&lt;slot&gt;</code> element is the <b>fallback</b>, shown when nothing is assigned.</li>
+<li>Children that match no slot (and there is no default slot) stay in the DOM but are <b>not rendered</b>.</li>
+<li>Slotted content is <b>not copied</b>: it stays in the normal ("light") DOM, which is why page CSS still styles it.</li>
+</ul>
+<pre><code>&lt;star-rating&gt;
+  &lt;span slot="legend"&gt;Blendan Smooth&lt;/span&gt;
+&lt;/star-rating&gt;
+&lt;star-rating&gt;&lt;/star-rating&gt;   &lt;!-- shows the fallback legend --&gt;</code></pre>
+
+<h2>3. Undefined and unknown elements</h2>
+<ul>
+<li>Browsers never fail on an element they do not recognise: it becomes an anonymous inline element with no styles or semantics, like a <code>&lt;span&gt;</code>.</li>
+<li><code>&lt;rating&gt;</code> (no hyphen) is a true <b>unknown element</b> (<code>HTMLUnknownElement</code>). <code>&lt;star-rating&gt;</code> is a valid custom element name that is merely <b>not yet defined</b>: it is a plain <code>HTMLElement</code> until you call <code>customElements.define</code>. The CSS pseudo-class <code>:defined</code> matches once it is upgraded.</li>
+<li>Until it is defined, its children render like they would in a <code>&lt;span&gt;</code>.</li>
+</ul>
+
+<h2>4. Custom elements</h2>
+<pre><code>customElements.define('star-rating', class extends HTMLElement {
+  constructor() {
+    super();                                   // always call super() first
+    const tpl = document.getElementById('star-rating-template').content;
+    const root = this.attachShadow({ mode: 'open' });
+    root.appendChild(tpl.cloneNode(true));
+  }
+});</code></pre>
+<ul>
+<li>The name <b>must</b> contain a hyphen and be lowercase (<code>star-rating</code>, <code>x-card</code>). A name without a hyphen throws; it is reserved for built-in elements.</li>
+<li><code>customElements.define(name, class)</code> can run only once per name. <code>customElements.get(name)</code> checks, and <code>customElements.whenDefined(name)</code> returns a promise.</li>
+<li>The browser attaches a shadow tree to each <code>&lt;star-rating&gt;</code> and puts a clone of the template in it. The element's own children are <b>not replaced</b>: they stay in the light DOM and are rendered only where a slot picks them up.</li>
+<li>Lifecycle callbacks: <code>connectedCallback</code>, <code>disconnectedCallback</code>, <code>attributeChangedCallback</code> (with <code>static get observedAttributes()</code>), <code>adoptedCallback</code>. Do heavy work in <code>connectedCallback</code>, not the constructor.</li>
+<li><code>attachShadow()</code> works only on autonomous custom elements and a short list of built-ins (<code>&lt;div&gt;</code>, <code>&lt;span&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;header&gt;</code>, <code>&lt;footer&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;blockquote&gt;</code>, headings, <code>&lt;body&gt;</code>). Not on <code>&lt;input&gt;</code>, <code>&lt;img&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;button&gt;</code>.</li>
+</ul>
+
+<h2>5. Shadow DOM and encapsulation</h2>
+<ul>
+<li>The <b>shadow host</b> is the element the shadow DOM is attached to. The <b>shadow root</b> is the root of the shadow tree. The boundary between shadow and regular DOM can be crossed, but only on purpose.</li>
+<li>Styles are <b>scoped</b>: page CSS does not reach inside, and the component's <code>&lt;style&gt;</code> does not leak out. That means you can use short selectors such as <code>input</code> instead of <code>input[type="radio"]</code>.</li>
+<li>Radios styled by the page stylesheet "go back to plain radios" inside a component for exactly this reason: page CSS no longer applies.</li>
+<li><code>mode: 'open'</code> makes the root reachable as <code>el.shadowRoot</code>. <code>mode: 'closed'</code> makes <code>el.shadowRoot</code> return <code>null</code>; it is a convenience, not a security feature.</li>
+<li>Elements inside a shadow tree are hidden from <code>document.querySelector</code>. Query <code>el.shadowRoot.querySelector(...)</code> instead.</li>
+<li>Form controls inside a shadow tree are <b>not part of the surrounding form</b>. To take part in a form, a custom element must be form-associated (<code>static formAssociated = true</code> and <code>ElementInternals</code>).</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">HSPV: ways to style across the boundary</b><b>H</b>ippos <b>S</b>ing <b>P</b>op <b>V</b>ocals = <code>:host</code>, <code>::slotted()</code>, <code>::part()</code>, CSS <b>V</b>ariables (custom properties).</aside>
+<table class="t"><tr><th>Tool</th><th>Where you write it</th><th>What it reaches</th></tr>
+<tr><td><code>:host</code>, <code>:host(.on)</code></td><td>Inside the component's <code>&lt;style&gt;</code></td><td>The host element itself (the <code>&lt;star-rating&gt;</code>)</td></tr>
+<tr><td><code>::slotted(legend)</code></td><td>Inside the component</td><td>Slotted <b>top-level</b> light-DOM elements that match (not their descendants)</td></tr>
+<tr><td><code>::part(name)</code></td><td>Page CSS: <code>star-rating::part(box)</code></td><td>Elements in the shadow tree marked <code>part="box"</code></td></tr>
+<tr><td><code>--custom-property</code></td><td>Page CSS, on the host or an ancestor</td><td>Custom properties and inherited properties (<code>color</code>, <code>font</code>) <b>do</b> cross the boundary</td></tr></table>
+<ul>
+<li><code>part</code> works like <code>class</code>: space-separated, reusable. <code>::part()</code> cannot be chained into descendants (<code>::part(a) span</code> is invalid). <code>exportparts</code> forwards parts through nested components.</li>
+<li>When page CSS and <code>:host</code> styles conflict, the <b>page (outer)</b> CSS wins, regardless of specificity, because outer context beats inner context for normal declarations. So <code>:host</code> is the right place for defaults.</li>
+<li>Selecting every instance from the page is as easy as <code>star-rating { ... }</code>.</li>
+</ul>
+<textarea class="try-src" data-title="Web component lab: template, slot, shadow" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px}
+ star-rating{display:block;margin:10px 0}
+ star-rating::part(box){border:2px dashed #A51C30}   /* page styles via ::part */
+ star-rating{--star-on:#e08a00}                       /* custom property crosses the boundary */
+ .lg{color:#A51C30;font-weight:700}                   /* page CSS still styles slotted content */
+&lt;/style&gt;
+&lt;template id="tpl"&gt;
+  &lt;style&gt;
+    :host{font-family:sans-serif}
+    .box{padding:8px;border-radius:8px;background:#fffdf5}
+    ::slotted([slot=legend]){text-decoration:underline}
+    button{font-size:26px;border:0;background:none;cursor:pointer;color:#bbb}
+    button.on{color:var(--star-on,gold)}
+  &lt;/style&gt;
+  &lt;div class="box" part="box"&gt;
+    &lt;slot name="legend"&gt;&lt;span&gt;Rate your experience:&lt;/span&gt;&lt;/slot&gt;
+    &lt;div id="stars"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;star-rating&gt;&lt;span slot="legend" class="lg"&gt;Blendan Smooth&lt;/span&gt;&lt;p&gt;This unslotted paragraph is in the DOM but never shown.&lt;/p&gt;&lt;/star-rating&gt;
+&lt;star-rating&gt;&lt;/star-rating&gt;
+&lt;pre id="out"&gt;&lt;/pre&gt;
+&lt;script&gt;
+ customElements.define('star-rating', class extends HTMLElement{
+   constructor(){
+     super();
+     var root=this.attachShadow({mode:'open'});
+     root.appendChild(document.getElementById('tpl').content.cloneNode(true));
+     var box=root.getElementById('stars'), btns=[];
+     for(var i=1;i&lt;=5;i++){(function(n){
+       var b=document.createElement('button'); b.type='button'; b.textContent='★'; b.setAttribute('aria-label',n+' stars');
+       b.onclick=function(){btns.forEach(function(x,j){x.classList.toggle('on',j&lt;n);}); root.host.dataset.value=n; report();};
+       btns.push(b); box.appendChild(b);})(i);}
+   }
+ });
+ function report(){
+   var els=document.querySelectorAll('star-rating'), t='';
+   els.forEach(function(e,k){t+='#'+(k+1)+' value='+(e.dataset.value||'none')+' | shadowRoot open: '+!!e.shadowRoot+' | light children: '+e.children.length+'\n';});
+   t+='document.querySelector("button") -&gt; '+document.querySelector('button')+'  (the buttons are hidden in the shadow tree)';
+   document.getElementById('out').textContent=t;
+ }
+ report();
+&lt;/script&gt;</textarea>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Declarative shadow DOM</b>Write <code>&lt;template shadowrootmode="open"&gt;...&lt;/template&gt;</code> as the first child of a host in HTML and the browser builds the shadow root while parsing, with no JavaScript (handy for server-rendered components). Older drafts used <code>shadowroot</code>, now replaced by <code>shadowrootmode</code>.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Theme with custom properties</b>Expose a few <code>--star-on</code>, <code>--star-size</code> variables in the component (<code>color: var(--star-on, gold)</code>) and let the page set them on any ancestor. That is simpler and more stable than exposing parts for everything.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Moving the template instead of cloning</b><code>root.appendChild(tpl.content)</code> empties the template after the first use, so the second <code>&lt;star-rating&gt;</code> renders blank. Always <code>cloneNode(true)</code>.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Expecting page CSS inside the component</b>A global <code>input { ... }</code> rule never reaches an input in a shadow tree. Put the styles in a <code>&lt;style&gt;</code> inside the template, or use custom properties and <code>::part()</code>.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Hyphen-less name or double define</b><code>customElements.define('rating', ...)</code> throws a <code>SyntaxError</code> (needs a hyphen). Defining the same name twice (two bundles, hot reload) throws <code>NotSupportedError</code>. Guard with <code>if (!customElements.get('star-rating'))</code>.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Shadow-DOM inputs missing from the form</b>A radio group inside a shadow tree is invisible to the page's <code>&lt;form&gt;</code>: <code>FormData</code> will not contain it and <code>required</code> will not block submission of the outer form. Use form-associated custom elements (<code>ElementInternals.setFormValue</code>) or keep real inputs in the light DOM.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the source says a custom-element name is "recommended" to be lowercase with a dash: the hyphen is <b>required</b> by the spec. It says the element's contents "will be replaced by a shadow root": light-DOM children are not replaced, they remain in the DOM and are rendered only through slots. "In terms of specificity, the global CSS wins" is a cascade-context rule (outer styles beat <code>:host</code>), not specificity. <code>&lt;rating&gt;</code> is called an unknown element: right, but <code>&lt;star-rating&gt;</code> is a not-yet-defined custom element, not unknown. A <code>&lt;legend&gt;</code> placed inside a <code>&lt;slot&gt;</code> in a <code>&lt;fieldset&gt;</code> may not be treated as the fieldset's legend by every browser/assistive tech: use a plain element with <code>aria-labelledby</code> where accessibility matters. The source says <code>shadowRoot</code> is "an interface rendered separately": the interface is <code>ShadowRoot</code>, reached via <code>el.shadowRoot</code>. Mismatched quotes (<code>name='star-rating-legend"</code>) fixed. <code>attachShadow</code> limits, <code>closed</code> mode, <code>::slotted</code> depth, <code>exportparts</code>, lifecycle callbacks, form association and declarative shadow DOM added. Removed: CodePen iframes, Google checklist plug, quiz.</div>
+
+<div class="practice" data-id="m18"></div>
+<div class="quiz" data-id="m18"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Lists | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ul, ol, dl and nesting">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m07">
+<header class="hero"><div class="in"><div class="kicker">Part 2 &middot; Module 07</div><h1>Lists</h1><p>ul, ol, dl and nesting</p></div></header>
+<main>
+<p>HTML has three kinds of list. Use a list whenever you have a group of related items, even if CSS removes the bullets (navigation bars, to-do lists, quiz answers).</p>
+
+<h2>1. The three list types</h2>
+<table class="t"><tr><th>Element</th><th>Meaning</th><th>Children</th></tr>
+<tr><td><code>&lt;ul&gt;</code></td><td>Unordered: order does not matter</td><td><code>&lt;li&gt;</code> only</td></tr>
+<tr><td><code>&lt;ol&gt;</code></td><td>Ordered: sequence matters</td><td><code>&lt;li&gt;</code> only</td></tr>
+<tr><td><code>&lt;dl&gt;</code></td><td>Description: name/value (key/value) pairs</td><td><code>&lt;dt&gt;</code>, <code>&lt;dd&gt;</code>, optional <code>&lt;div&gt;</code> groups</td></tr></table>
+<p><code>&lt;menu&gt;</code> is also allowed to hold <code>&lt;li&gt;</code> (an unordered list for toolbars). Form lists (<code>&lt;select&gt;</code>, <code>&lt;datalist&gt;</code>, <code>&lt;optgroup&gt;</code>) are built from <code>&lt;option&gt;</code> and belong to forms.</p>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">OUD: the list trio</b><b>O</b>ranges <b>U</b>nder <b>D</b>esks = <b>O</b>rdered (<code>ol</code>), <b>U</b>nordered (<code>ul</code>), <b>D</b>escription (<code>dl</code>).</aside>
+
+<h2>2. ul, ol and li</h2>
+<ul>
+<li>The only valid children of <code>&lt;ul&gt;</code> and <code>&lt;ol&gt;</code> are <code>&lt;li&gt;</code> elements (plus script-supporting elements).</li>
+<li>To nest a list, put it <b>inside</b> an <code>&lt;li&gt;</code>, never directly inside the <code>&lt;ul&gt;</code>/<code>&lt;ol&gt;</code>.</li>
+<li><code>&lt;ul&gt;</code> has no element-specific attributes. Bullet style is CSS (<code>list-style-type</code>).</li>
+<li><code>&lt;li&gt;</code> may contain any flow content: paragraphs, images, blockquotes, headings, even more lists.</li>
+<li>The closing <code>&lt;/li&gt;</code> is optional in the spec. Write it anyway: one rule, no exceptions to remember.</li>
+</ul>
+<pre><code>&lt;ul&gt;
+  &lt;li&gt;Elements
+    &lt;ul&gt;
+      &lt;li&gt;Replaced&lt;/li&gt;
+      &lt;li&gt;Void&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Attributes&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+<h2>3. Ordered-list attributes</h2>
+<table class="t"><tr><th>Attribute</th><th>On</th><th>Effect</th></tr>
+<tr><td><code>type</code></td><td><code>&lt;ol&gt;</code></td><td><code>1</code> (default), <code>a</code>, <code>A</code>, <code>i</code>, <code>I</code></td></tr>
+<tr><td><code>start</code></td><td><code>&lt;ol&gt;</code></td><td>First number (default 1; can be 0 or negative)</td></tr>
+<tr><td><code>reversed</code></td><td><code>&lt;ol&gt;</code></td><td>Boolean: count down</td></tr>
+<tr><td><code>value</code></td><td><code>&lt;li&gt;</code></td><td>Sets this item's number; later items continue from it</td></tr></table>
+<p>CSS <code>list-style-type</code> overrides <code>type</code>. Keep <code>type</code> in documents where numbering style is part of the content (legal text). For purely presentational numbering use CSS counters and <code>::marker</code>.</p>
+<textarea class="try-src" data-title="Ordered list lab" hidden>&lt;style&gt;body{font-family:sans-serif}&lt;/style&gt;
+&lt;h3&gt;Countdown&lt;/h3&gt;
+&lt;ol reversed&gt;
+  &lt;li&gt;Third&lt;/li&gt;&lt;li&gt;Second&lt;/li&gt;&lt;li&gt;First&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Legal style, starting at 4&lt;/h3&gt;
+&lt;ol type="a" start="4"&gt;
+  &lt;li&gt;Clause d&lt;/li&gt;
+  &lt;li value="10"&gt;Item 10 (value)&lt;/li&gt;
+  &lt;li&gt;Item 11 (continues)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Description list&lt;/h3&gt;
+&lt;dl&gt;
+  &lt;dt&gt;HAL&lt;/dt&gt;&lt;dd&gt;Spaceship computer&lt;/dd&gt;
+  &lt;dt&gt;EVE&lt;/dt&gt;&lt;dd&gt;Probe droid&lt;/dd&gt;&lt;dd&gt;Extraterrestrial Vegetation Evaluator&lt;/dd&gt;
+&lt;/dl&gt;</textarea>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">RSTV: ol and li numbering</b><b>R</b>abbits <b>S</b>ing <b>T</b>unes <b>V</b>ery-loudly = <code>reversed</code>, <code>start</code>, <code>type</code> on the <code>ol</code>, <code>value</code> on the <code>li</code>.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Count anything</b><code>start="0"</code> or negative numbers work, and <code>reversed</code> plus <code>start</code> makes custom countdowns. <code>&lt;li value="n"&gt;</code> jumps the numbering for the rest of the list.</aside>
+
+<h2>4. Description lists</h2>
+<ul>
+<li><code>&lt;dt&gt;</code> is the term, <code>&lt;dd&gt;</code> the details. They were once called "definition" lists, but are for any key/value data (glossaries, metadata, FAQs of facts).</li>
+<li>Pairs are not forced one-to-one: a term can have several <code>&lt;dd&gt;</code>s, and several terms can share one <code>&lt;dd&gt;</code>. Each <code>&lt;dt&gt;</code> needs at least one <code>&lt;dd&gt;</code>.</li>
+<li><code>&lt;dl&gt;</code> has no implicit ARIA role. <code>&lt;dt&gt;</code> is term, <code>&lt;dd&gt;</code> is definition.</li>
+<li>Wrap each group in a <code>&lt;div&gt;</code> inside the <code>&lt;dl&gt;</code> when you need to style them as units. <code>&lt;template&gt;</code> and <code>&lt;script&gt;</code> are also allowed as children.</li>
+<li>No element-specific attributes on <code>&lt;dl&gt;</code>, <code>&lt;dt&gt;</code> or <code>&lt;dd&gt;</code>.</li>
+</ul>
+
+<h2>5. Lists without bullets</h2>
+<p>Navigation bars and card grids are lists too. But <code>list-style: none</code> (or <code>display: grid/flex</code> on the list) can make Safari with VoiceOver drop the list semantics. If users benefit from "list, 5 items", add <code>role="list"</code> on the <code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code>.</p>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Style bullets without markup</b><code>li::marker { color: crimson }</code> recolours bullets or numbers. Pair <code>counter-reset</code> and <code>counter-increment</code> with <code>::before</code> for custom labels such as "Step 1", and keep the real <code>&lt;ol&gt;</code> for semantics.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Direct ul in ul</b><code>&lt;ul&gt;&lt;ul&gt;...&lt;/ul&gt;&lt;/ul&gt;</code> is invalid: nested lists belong inside an <code>&lt;li&gt;</code>. Likewise <code>&lt;div&gt;</code> directly inside <code>&lt;ul&gt;</code> is invalid.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Fake lists</b>Lines separated by <code>&lt;br&gt;</code> or typed "•" and "1." characters have no list semantics: no item count, no list navigation.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Bullets removed, list lost</b>A nav <code>&lt;ul&gt;</code> with <code>list-style:none</code> can stop being announced as a list in Safari. Always check with a screen reader when styling lists.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">List inside a paragraph</b><code>&lt;p&gt;</code> cannot contain <code>&lt;ul&gt;</code>: the parser closes the paragraph before the list. Put the list after the paragraph.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say headings inside list items make the item "sectioning content". Wrong: a heading is <b>heading content</b>; <code>&lt;li&gt;</code> simply allows any flow content. Typos fixed: <code>&lt;dd&amp;gt;</code> mangled entity, <code>alt="Vaccuum'</code> (vacuum, mismatched quote). Removed: CodePen iframes and the MLW (Machine Learning Workshop) joke-page walkthrough. Added: <code>&lt;menu&gt;</code>, nesting rule, <code>value</code>/<code>reversed</code> interplay, the <code>&lt;p&gt;</code> parsing trap.</div>
+
+<div class="practice" data-id="m07"></div>
+<div class="quiz" data-id="m07"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

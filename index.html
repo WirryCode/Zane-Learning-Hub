@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet"><link rel="manifest" href="manifest.webmanifest">
+<script src="js/prefs.js"></script>
+<script src="js/profile.js"></script>
+<link rel="stylesheet" href="css/style.css"><link rel="icon" href="img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png"><link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<title>Zane Learning Hub | HTML Mastery</title>
+<meta name="description" content="A complete HTML course with live editor, quizzes, flashcards and a mock exam.">
+</head>
+<body data-root="">
+<header class="hero"><div class="in"><span class="hero-logo"><img src="img/logo-dark.png" width="740" height="260" alt="Zane Learning Hub"></span><div class="kicker">Zane Learning Hub &middot; The complete exam-ready course</div><h1>HTML Mastery</h1><p class="slogan" style="font:italic 700 1.2rem 'Playfair Display',Georgia,serif;color:var(--gold-l);letter-spacing:.02em;margin:.1rem 0 .7rem">Read it, Try it, Know it</p><p>From the first doctype to the Web APIs: notes distilled, mistakes flagged, memory aids added, and a live editor to prove it.</p>
+<div class="meta"><span class="chip">✎ Live code editor</span><span class="chip">★ Quizzes &amp; flashcards</span><span class="chip">🧠 Acronyms</span><span class="chip">☠ Fail-point notes</span></div>
+<div class="bar-p"><i id="pbar"></i></div><p id="ptxt" style="font:.8rem system-ui,sans-serif;margin-top:.4rem"></p></div></header>
+<main>
+<h2>How to use this course</h2>
+<p>Read a module, run every <b>Try it</b> editor, study the sticky notes, then take the quiz. Finish with <a href="study.html">Study mode</a> (Leitner flashcards, mixed quizzes and a ten-minute daily plan), your <a href="weak.html">Weak spots</a>, the <a href="modules/mock-exam.html">cheat sheet and acronym vault</a>, and the timed <a href="exam.html">mock exam</a>.</p>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span>Typical errors programmers make in each area.</aside>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span>Silly acronyms that make facts stick.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span>Shortcuts and slightly advanced techniques.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span>The mistakes that quietly break pages.</aside>
+<div id="mods"></div>
+</main>
+<script src="data/modules.js"></script><script src="data/quizzes.js"></script><script src="js/app.js"></script><script src="js/reach.js"></script><script src="js/palette.js"></script>
+<script>
+(function(){var p=HM.store(true)||{},h='',part=0,ready=0,done=0;
+MODULES.forEach(function(m){if(m.part!==part){if(part)h+='</div>';part=m.part;h+='<h2>Part '+part+'</h2><div class="grid">';}
+var live=m.status==='ready';if(live)ready++;var d=p[m.id]&&p[m.id].best>=0;if(d)done++;
+h+='<a class="card'+(live?'':' soon')+'" href="'+(live?'modules/'+m.slug+'.html':'#')+'"><span class="n">MODULE '+m.num+(live?'':' · COMING')+(d?' · ✓ '+Number(p[m.id].best)+'%':'')+'</span><h3>'+HM.esc(m.title)+'</h3><p>'+HM.esc(m.blurb)+'</p></a>';});
+document.getElementById('mods').innerHTML=h+'</div>';
+document.getElementById('pbar').style.width=(done/MODULES.length*100)+'%';
+document.getElementById('ptxt').textContent=ready+' of '+MODULES.length+' modules released · '+done+' quizzes taken';})();
+</script>
+</body>
+</html>

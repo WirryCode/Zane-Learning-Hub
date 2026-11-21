@@ -1,0 +1,49 @@
+{
+  "name": "Zane Learning Hub",
+  "short_name": "Zane Learning Hub",
+  "description": "A complete, exam-ready HTML course with live editors, quizzes, flashcards, practice challenges and a mock exam.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./index.html?src=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf6ee",
+  "theme_color": "#121212",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Study mode",
+      "url": "./study.html",
+      "description": "Flashcards, mixed quiz and today's plan"
+    },
+    {
+      "name": "Mock exam",
+      "url": "./exam.html",
+      "description": "40 questions, 45 minutes"
+    }
+  ]
+}

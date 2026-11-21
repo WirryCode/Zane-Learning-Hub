@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>HTML Performance | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Core Web Vitals, TTFB, caching, resource hints, images">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m20">
+<header class="hero"><div class="in"><div class="kicker">Part 4 &middot; Module 20</div><h1>HTML Performance</h1><p>Core Web Vitals, TTFB, caching, resource hints, images</p></div></header>
+<main>
+<p>A fast site starts with a fast HTML response, and then depends on how well your markup tells the browser what to fetch first. This module covers both halves: the <b>server side</b> of the first request (redirects, caching, compression, CDNs) and the <b>markup side</b> (scripts, resource hints, images, DOM size), measured with the Core Web Vitals.</p>
+
+<h2>1. What "fast" means: the metrics</h2>
+<table class="t"><tr><th>Metric</th><th>Measures</th><th>"Good" (75th percentile of real users)</th></tr>
+<tr><td><b>LCP</b> Largest Contentful Paint</td><td>When the biggest visible element (usually a hero image or heading block) has rendered</td><td>2.5 s or less</td></tr>
+<tr><td><b>INP</b> Interaction to Next Paint</td><td>How quickly the page responds visually to clicks, taps and key presses (replaced FID in March 2024)</td><td>200 ms or less</td></tr>
+<tr><td><b>CLS</b> Cumulative Layout Shift</td><td>How much visible content jumps around unexpectedly</td><td>0.1 or less</td></tr>
+<tr><td>FCP First Contentful Paint</td><td>First text or image drawn</td><td>1.8 s or less</td></tr>
+<tr><td>TTFB Time to First Byte</td><td>Request sent until the first byte of HTML arrives</td><td>0.8 s or less</td></tr></table>
+<ul>
+<li>LCP, INP and CLS are the three <b>Core Web Vitals</b>. FCP and TTFB are supporting metrics.</li>
+<li><b>Lab data</b> (Lighthouse, DevTools) is a controlled test you can repeat. <b>Field data</b> (the Chrome User Experience Report, <code>PerformanceObserver</code> on real visits) is what users actually experience. Use lab data to debug and field data to judge.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">LIC: the three vitals</b><b>L</b>ions <b>I</b>nspect <b>C</b>heese = <b>L</b>CP (loading), <b>I</b>NP (interaction), <b>C</b>LS (visual stability).</aside>
+
+<h2>2. The first request: HTML and TTFB</h2>
+<p>Typing a URL sends a GET request for HTML. Every step before the first byte adds to TTFB, and a slow TTFB makes good LCP and FCP hard to reach.</p>
+<h3>Minimise redirects</h3>
+<ul>
+<li>A <code>301</code>/<code>308</code> (permanent) or <code>302</code>/<code>307</code> (temporary) redirect costs an <b>extra round trip</b> to the new URL.</li>
+<li><b>Same-origin</b> redirects are yours to fix. <b>Cross-origin</b> ones (ads, URL shorteners) are not, but avoid chains such as <code>http://</code> to <code>https://</code> to <code>www</code>.</li>
+<li>Link directly to the final URL. A common waste is <code>/page/</code> redirecting to <code>/page</code> (or the reverse): link to the form that does not redirect.</li>
+</ul>
+<h3>Cache HTML carefully</h3>
+<ul>
+<li>HTML references fingerprinted CSS, JS and images, so a cached page can point at old files after a deploy. A <b>short</b> lifetime still beats none: it lets a CDN absorb requests and lets browsers revalidate. Five minutes (<code>Cache-Control: max-age=300</code>) is a safe starting point for static pages.</li>
+<li><b>Personalised</b> HTML (a logged-in user) should usually not be cached at all: a cached copy cannot be invalidated from the server.</li>
+<li>Revalidation: the server sends an <code>ETag</code> (a hash of the content). The browser returns it in <code>If-None-Match</code>; if it matches, the server replies <code>304 Not Modified</code> with no body. <code>Last-Modified</code> works the same way with dates. It still costs a round trip.</li>
+<li><code>no-cache</code> does <b>not</b> mean "do not cache": it means "revalidate before using". <code>no-store</code> means never store. For static assets with hashed names, use <code>Cache-Control: public, max-age=31536000, immutable</code>.</li>
+</ul>
+<h3>Measure the server</h3>
+<ul>
+<li>A dynamically built page (database queries) usually has a higher TTFB than a static file. Moving the work to the client with a spinner pushes it to a less predictable environment and usually hurts user-centric metrics.</li>
+<li>Expose where server time goes with the <code>Server-Timing</code> header, e.g. <code>Server-Timing: auth;dur=55.5, db;dur=220</code> (authentication 55.5 ms, database 220 ms). Collect it from real users with the Navigation Timing API.</li>
+<li>Check hosting capacity: shared hosting often has a high TTFB.</li>
+</ul>
+<h3>Compress text</h3>
+<ul>
+<li>Compress HTML, CSS, JavaScript, SVG and JSON. <b>Brotli</b> beats <b>gzip</b> by roughly 15 to 20%, works in all major browsers (over HTTPS), and gzip remains the fallback. Any compression beats none. Do not compress already-compressed images, video or fonts like WOFF2.</li>
+<li>Very small files (under about 1 KiB) compress poorly. Do not ship a huge file merely because it compresses well: big JS and CSS cost parse time after decompression.</li>
+<li><b>Static</b> compression (done at build time) suits CSS, JS and SVG. <b>Dynamic</b> compression (done per request) suits generated HTML.</li>
+</ul>
+<h3>Use a CDN</h3>
+<p>A <b>Content Delivery Network</b> is a distributed set of servers that cache your content at <b>edge</b> servers physically close to users. It cuts round-trip time and adds HTTP/2 or HTTP/3, caching and compression, often improving TTFB.</p>
+
+<h2>3. Loading resources from the markup</h2>
+<h3>Scripts and CSS</h3>
+<ul>
+<li>CSS is <b>render-blocking</b>: the browser will not paint until it has the CSS in the head. Keep it small. A <code>&lt;link rel="stylesheet" media="print"&gt;</code> is not render-blocking for screen.</li>
+<li>A classic <code>&lt;script src&gt;</code> is <b>parser-blocking</b>. Add <code>defer</code> (download in parallel, run in order after parsing) or <code>async</code> (run as soon as downloaded, any order). <code>type="module"</code> scripts defer by default.</li>
+<li>Do not put third-party scripts in the critical path; load them late or with <code>async</code>.</li>
+</ul>
+<h3>Resource hints</h3>
+<table class="t"><tr><th>Hint</th><th>Does</th><th>Use for</th></tr>
+<tr><td><code>rel="preload" as="..."</code></td><td>Fetch now, high priority, for the current page</td><td>LCP image, key font (needs <code>crossorigin</code>), critical CSS or script discovered late</td></tr>
+<tr><td><code>rel="preconnect"</code></td><td>DNS lookup, TCP and TLS handshake in advance</td><td>The 1 to 3 cross-origin hosts you will certainly use (add <code>crossorigin</code> for fonts)</td></tr>
+<tr><td><code>rel="dns-prefetch"</code></td><td>DNS lookup only</td><td>Cheap fallback for less critical hosts</td></tr>
+<tr><td><code>rel="prefetch"</code></td><td>Low-priority fetch for the <b>next</b> navigation</td><td>The likely next page's assets</td></tr>
+<tr><td><code>rel="modulepreload"</code></td><td>Preload and parse an ES module</td><td>Module graphs</td></tr></table>
+<pre><code>&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link rel="preload" href="/fonts/Body.woff2" as="font" type="font/woff2" crossorigin&gt;
+&lt;link rel="preload" href="/img/hero.avif" as="image" fetchpriority="high"&gt;
+&lt;script src="/js/app.js" defer&gt;&lt;/script&gt;</code></pre>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">PPPD: the resource hints</b><b>P</b>andas <b>P</b>our <b>P</b>ink <b>D</b>umplings = <b>P</b>reload, <b>P</b>reconnect, <b>P</b>refetch, <b>D</b>NS-prefetch.</aside>
+<h3>Images</h3>
+<ul>
+<li>Always set <code>width</code> and <code>height</code> (unitless pixels) on <code>&lt;img&gt;</code> and <code>&lt;video&gt;</code>. The browser uses them to compute an aspect ratio and <b>reserve space</b> before the file arrives, preventing layout shift. Add <code>img { max-width: 100%; height: auto }</code> for responsive scaling.</li>
+<li><code>loading="lazy"</code> on images and iframes <b>below the fold</b>. Never on the LCP image or anything visible at load.</li>
+<li><code>fetchpriority="high"</code> on the LCP image; <code>fetchpriority="low"</code> on unimportant ones. It is a hint.</li>
+<li><code>srcset</code> and <code>sizes</code> (or <code>&lt;picture&gt;</code>) send small files to small screens; use AVIF or WebP with a fallback. <code>decoding="async"</code> keeps decoding off the main thread.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">WSLFD: image checklist</b><b>W</b>ombats <b>S</b>ip <b>L</b>ime <b>F</b>izz <b>D</b>aily = <b>W</b>idth/height, <b>S</b>rcset, <b>L</b>azy (not the hero), <b>F</b>etchpriority, <b>D</b>ecoding async.</aside>
+
+<h2>4. DOM size and rendering cost</h2>
+<ul>
+<li>Every node costs memory and makes style calculation and layout slower, especially after changes. Lighthouse warns above roughly 800 nodes and flags an excessive DOM above about 1,400, deep nesting (over about 32 levels) and parents with over about 60 children.</li>
+<li>Count nodes: <code>document.getElementsByTagName('*').length</code>. Remove wrapper <code>&lt;div&gt;</code>s, paginate or virtualise long lists, and render off-screen sections lazily with <code>content-visibility: auto</code>.</li>
+<li>Avoid <b>layout thrashing</b>: alternating reads (<code>offsetHeight</code>) and writes (<code>style.height = ...</code>) in a loop forces repeated layout. Batch reads first, then writes.</li>
+<li>Reduce JavaScript before reducing anything else for INP: long tasks block the next paint. Break them up and do less on the main thread.</li>
+</ul>
+<textarea class="try-src" data-title="Layout shift lab: width/height and DOM size" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px} button{padding:5px 10px;font:inherit;margin:2px}
+ img{max-width:100%;height:auto} #below{background:#fffbe0;padding:6px;margin:6px 0}
+ pre{background:#eee;padding:6px;font-size:12px;white-space:pre-wrap}
+&lt;/style&gt;
+&lt;p&gt;&lt;button id="a"&gt;Add image WITHOUT width/height&lt;/button&gt; &lt;button id="b"&gt;Add image WITH width/height&lt;/button&gt; &lt;button id="r"&gt;Reset&lt;/button&gt;&lt;/p&gt;
+&lt;div id="slot"&gt;&lt;/div&gt;
+&lt;p id="below"&gt;I am the paragraph below the image. Watch me jump.&lt;/p&gt;
+&lt;pre id="out"&gt;Press a button. The image file "arrives" after 800 ms.&lt;/pre&gt;
+&lt;p&gt;&lt;button id="n"&gt;Add 500 list items&lt;/button&gt; &lt;span id="count"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul id="list"&gt;&lt;/ul&gt;
+&lt;script&gt;
+ var svg='data:image/svg+xml,'+encodeURIComponent('&lt;svg xmlns="http://www.w3.org/2000/svg" width="300" height="120"&gt;&lt;rect width="300" height="120" fill="#A51C30"/&gt;&lt;text x="150" y="68" fill="#fff" font-size="22" text-anchor="middle"&gt;hero image 300x120&lt;/text&gt;&lt;/svg&gt;');
+ var out=document.getElementById('out'), below=document.getElementById('below'), slot=document.getElementById('slot'), cls=0, hasLS=true;
+ function ptop(){return Math.round(below.getBoundingClientRect().top+window.scrollY);}
+ function nodes(){document.getElementById('count').textContent='DOM nodes: '+document.getElementsByTagName('*').length;}
+ nodes();
+ var po=null; function take(){if(!po)return; po.takeRecords().forEach(function(e){if(!e.hadRecentInput){cls+=e.value;}});}
+ try{po=new PerformanceObserver(function(l){l.getEntries().forEach(function(e){if(!e.hadRecentInput){cls+=e.value;}});}); po.observe({type:'layout-shift'});}catch(e){hasLS=false;}
+ function add(sized){
+   slot.innerHTML=''; take(); cls=0; var img=new Image(); img.alt='';
+   if(sized){img.width=300;img.height=120;}
+   slot.appendChild(img);
+   var t0=ptop();
+   out.textContent=(sized?'WITH':'WITHOUT')+' width/height. Paragraph top before the file arrives: '+t0+'px. Waiting...';
+   setTimeout(function(){
+     take(); cls=0; /* ignore shifts caused by clearing/adding the empty image */
+     img.onload=function(){ setTimeout(function(){ take();
+       var t1=ptop();
+       out.textContent=(sized?'WITH':'WITHOUT')+' width/height\nparagraph top before arrival: '+t0+'px\nparagraph top after arrival:  '+t1+'px\nSHIFT: '+(t1-t0)+'px '+((t1-t0)?'(layout shift: CLS cost!)':'(space was reserved: no shift)')+
+         (hasLS?'\nlayout-shift score reported by the browser: '+cls.toFixed(3):'\n(layout-shift entries not supported here)');
+     },250); };
+     img.src=svg;
+   },800);
+ }
+ document.getElementById('a').onclick=function(){add(false);};
+ document.getElementById('b').onclick=function(){add(true);};
+ document.getElementById('r').onclick=function(){slot.innerHTML='';cls=0;out.textContent='Reset.';};
+ document.getElementById('n').onclick=function(){var l=document.getElementById('list'),f=document.createDocumentFragment();for(var i=0;i&lt;500;i++){var li=document.createElement('li');li.textContent='item '+i;f.appendChild(li);}l.appendChild(f);nodes();};
+&lt;/script&gt;</textarea>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Lazy-loading the hero image</b><code>loading="lazy"</code> on the largest above-the-fold image delays it until layout is known and wrecks LCP. Lazy-load only what is below the fold; give the hero <code>fetchpriority="high"</code>.</aside>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Preloading everything</b>Each <code>preload</code> competes for bandwidth with the real critical resources. Preload only what the browser would find late and certainly use; an unused preload triggers a console warning and wastes data.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Priority in one attribute</b><code>&lt;img src="hero.avif" fetchpriority="high"&gt;</code> boosts the LCP image without a preload tag, and <code>fetchpriority="low"</code> on a carousel's later slides frees bandwidth. Check the effect in DevTools' Network "Priority" column.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Skip rendering off-screen sections</b><code>section.below-fold { content-visibility: auto; contain-intrinsic-size: auto 600px; }</code> lets the browser skip layout and paint for sections that are not yet near the viewport.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Images with no dimensions</b>Without <code>width</code> and <code>height</code> the box is 0 tall until the file downloads, then everything below jumps. That is the commonest source of CLS, and it is a free fix.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Blocking script in the head</b>A plain <code>&lt;script src&gt;</code> in <code>&lt;head&gt;</code> stops the parser: nothing after it renders until it downloads and runs. Use <code>defer</code>, or <code>async</code> for independent scripts.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Caching personalised HTML</b>Serving a cached page that includes one user's name or basket to another is a privacy bug, not a speed-up. Use <code>Cache-Control: private, no-store</code> (or vary correctly) for per-user HTML.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes gave no numbers for TTFB or caching: added the TTFB 0.8 s "good" guide and clarified that <code>no-cache</code> means "revalidate". "Five minutes for static HTML" and "Brotli about 15 to 20% better than gzip" were checked and kept as sensible rules of thumb, not guarantees. The notes stop at the server and CDN: the markup side (lazy, <code>fetchpriority</code>, preload and preconnect, <code>async</code>/<code>defer</code>, <code>width</code>/<code>height</code>, <code>srcset</code>, DOM size) and the Core Web Vitals (INP replaced FID in March 2024) were added. The notes imply compression is always good: not for already-compressed files, and small files gain little. Removed: ismyhostfastyet.com and CrUX promotion, "Optimize TTFB", "CDN guide" and "critical path" plugs, the caching demo iframe, quiz. Module blurb in <code>build.py</code> ("TTFB, caching, compression, CDN") should be widened in the next stage.</div>
+
+<div class="practice" data-id="m20"></div>
+<div class="quiz" data-id="m20"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

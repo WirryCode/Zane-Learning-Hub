@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Forms | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Inputs, labels, validation, fieldsets">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m12">
+<header class="hero"><div class="in"><div class="kicker">Part 3 &middot; Module 12</div><h1>Forms</h1><p>Inputs, labels, validation, fieldsets</p></div></header>
+<main>
+<p>A <code>&lt;form&gt;</code> collects input and sends it to a server, and HTML alone can do a surprising amount of this: required fields, patterns, ranges, even submitting and loading a new page, all without JavaScript. This module covers the structure, the submitted data, labels, and built-in validation.</p>
+
+<h2>1. The form element</h2>
+<ul>
+<li><code>&lt;form&gt;</code> wraps the controls. It is a <b>landmark</b> only when it has an accessible name (<code>aria-label</code> or <code>aria-labelledby</code>); an unnamed form is generic.</li>
+<li><code>action</code>: the URL that processes the data (default: the current page).</li>
+<li><code>method</code>: <code>get</code> (default) puts <code>name=value</code> pairs in the URL; <code>post</code> puts them in the request body. Use <code>post</code> for passwords, personal data and anything that changes state. (And serve it over HTTPS.)</li>
+<li><code>method="dialog"</code> inside a <code>&lt;dialog&gt;</code> closes the dialog and sets its <code>returnValue</code>; nothing is sent.</li>
+<li><code>enctype</code>: <code>application/x-www-form-urlencoded</code> (default), <code>multipart/form-data</code> (required for file uploads), <code>text/plain</code>.</li>
+<li><code>novalidate</code> on the form switches off built-in validation.</li>
+<li><code>form="id"</code> on a control (or <code>&lt;fieldset&gt;</code>, <code>&lt;button&gt;</code>, <code>&lt;output&gt;</code>) attaches it to a form it is not nested in. An empty or wrong value detaches it from its own form!</li>
+</ul>
+<pre><code>&lt;form action="/enrol" method="post" aria-label="Workshop registration"&gt;
+  &lt;label for="full_name"&gt;Your name&lt;/label&gt;
+  &lt;input type="text" id="full_name" name="name" required&gt;
+  &lt;button type="submit"&gt;Enrol&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+<h2>2. Buttons and overrides</h2>
+<ul>
+<li>Two ways to write a submit button: <code>&lt;input type="submit" value="Send"&gt;</code> (label from <code>value</code>) or <code>&lt;button type="submit"&gt;Send&lt;/button&gt;</code> (label from content, can hold markup).</li>
+<li><code>&lt;button&gt;</code> inside a form <b>defaults to submit</b>. Say <code>type="button"</code> for buttons that should not submit, and <code>type="reset"</code> to clear.</li>
+<li>A button's <code>formaction</code>, <code>formenctype</code>, <code>formmethod</code>, <code>formnovalidate</code> and <code>formtarget</code> override the form's <code>action</code>, <code>enctype</code>, <code>method</code>, <code>novalidate</code> and <code>target</code> for that click.</li>
+<li>Typical "Save draft" button: <code>&lt;button formnovalidate&gt;</code>. Typical "Cancel" in a dialog: <code>formmethod="dialog" formnovalidate</code>.</li>
+<li>Only the clicked submit button is sent, and only if it has a <code>name</code>.</li>
+</ul>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">AEMNT: form override attributes</b><b>A</b>liens <b>E</b>at <b>M</b>y <b>N</b>oodle <b>T</b>ins = <code>formaction</code>, <code>formenctype</code>, <code>formmethod</code>, <code>formnovalidate</code>, <code>formtarget</code>.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Button that submits by accident</b><code>&lt;button onclick="openMenu()"&gt;</code> inside a form is a submit button. Clicking it reloads the page. Always write <code>type="button"</code> for non-submit buttons.</aside>
+
+<h2>3. What gets submitted</h2>
+<p>The browser sends one <code>name=value</code> pair for each successful control. A control is sent only if it has a <b>name</b>, is <b>not disabled</b>, and (for checkboxes and radios) is <b>checked</b>.</p>
+<ul>
+<li>Value: the <code>value</code> attribute, or what the user typed or picked. A <code>&lt;textarea&gt;</code>'s value is its text. An <code>&lt;option&gt;</code> without <code>value</code> sends its inner text.</li>
+<li>Unchecked checkboxes and radios send nothing. A checked checkbox with no <code>value</code> sends <code>on</code>.</li>
+<li>A named text control left empty still sends <code>name=</code> with an empty value.</li>
+<li><code>readonly</code> controls are sent; <code>disabled</code> ones are not.</li>
+<li>Controls the user cannot edit (<code>hidden</code>, <code>radio</code>, <code>checkbox</code>, <code>submit</code>, <code>button</code>, <code>reset</code>) should always carry a <code>value</code>.</li>
+<li>A <code>&lt;fieldset&gt;</code> and an <code>&lt;output&gt;</code> are not submitted (their named children are).</li>
+</ul>
+<pre><code>&lt;!-- picking the 2nd option and submitting a GET form: --&gt;
+&lt;select name="student"&gt;
+  &lt;option value="hoover"&gt;Hoover Sukhdeep&lt;/option&gt;
+  &lt;option&gt;Blendan Smooth&lt;/option&gt;     &lt;!-- no value: inner text is sent --&gt;
+&lt;/select&gt;
+&lt;!-- ?student=hoover   or   ?student=Blendan+Smooth --&gt;</code></pre>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">NDC: is the control sent?</b><b>N</b>arwhals <b>D</b>on't <b>C</b>ook = needs a <b>N</b>ame, not <b>D</b>isabled, <b>C</b>hecked (if a checkbox or radio).</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Forgot the name</b>An input with an <code>id</code> but no <code>name</code> shows up on screen and vanishes from the submission. <code>id</code> is for labels and scripts; <code>name</code> is for the server.</aside>
+
+<h2>4. Radios and checkboxes</h2>
+<ul>
+<li><b>Radios</b> in one group share the same <code>name</code>; only one can be selected. Give each a different <code>value</code>. Two separate questions accidentally sharing a name will cancel each other out.</li>
+<li><code>checked</code> pre-selects one. It matches <code>:default</code> for ever, while the current selection matches <code>:checked</code>.</li>
+<li>To require a choice, put <code>required</code> on at least one radio of the group.</li>
+<li>Checkboxes in a group may share a name (all selected values are sent as repeated pairs: <code>chk=a&amp;chk=b</code>). Always give them values, or you get <code>chk=on&amp;chk=on</code>.</li>
+<li><code>required</code> on a checkbox only affects that checkbox.</li>
+</ul>
+
+<h2>5. Labels and fieldsets</h2>
+<ul>
+<li>Every control except buttons needs a label. A button's name comes from its content or <code>value</code>.</li>
+<li><b>Explicit</b>: <code>&lt;label for="id"&gt;</code> plus <code>id</code> on the control. <b>Implicit</b>: nest the control inside the label.</li>
+<li>Labels are click targets too, which helps dexterity issues and thick fingers.</li>
+<li>No links or other interactive elements inside a label.</li>
+<li><code>placeholder</code> is a hint, not a label: it vanishes when typing and has weak contrast.</li>
+<li>Label a <b>group</b> with <code>&lt;fieldset&gt;</code> and <code>&lt;legend&gt;</code> (radios, checkboxes, address blocks). Fieldsets can nest. <code>disabled</code> on a fieldset disables everything inside it (except the first legend's content).</li>
+</ul>
+<aside class="sticky mistake"><span class="tag">⚠ Common mistake</span><b class="t">Two radio groups, one name</b>Reusing <code>name="choice"</code> for two separate questions makes them one group: picking in the second silently unpicks the first. Each question needs its own name.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Placeholder as the only label</b>Screen readers may skip it, it disappears as soon as the user types, and the grey text fails contrast. Use a real <code>&lt;label&gt;</code>.</aside>
+
+<h2>6. Input types, keyboards and files</h2>
+<ul>
+<li>There are 22 input types: button, checkbox, color, date, datetime-local, email, file, hidden, image, month, number, password, radio, range, reset, search, submit, tel, text, time, url, week.</li>
+<li>On phones the type picks the keyboard: <code>tel</code> shows a keypad, <code>email</code> adds <code>@</code>, <code>url</code> adds <code>/</code>. <code>inputmode</code> and <code>enterkeyhint</code> fine-tune it without changing validation.</li>
+<li><code>type="file"</code>: <code>accept</code> limits kinds (<code>image/*</code>, <code>video/*</code>, <code>audio/*</code>, <code>.pdf</code> or a comma list). <code>capture="user"</code> or <code>"environment"</code> asks a phone for the front or back camera. <code>multiple</code> allows several files. Remember <code>enctype="multipart/form-data"</code>.</li>
+<li><code>&lt;input type="image"&gt;</code> is a graphical submit button that sends the click's <code>x</code> and <code>y</code> coordinates (cross-reference: Images module).</li>
+<li><code>autocomplete</code> (<code>email</code>, <code>given-name</code>, <code>postal-code</code>, <code>new-password</code>, <code>one-time-code</code>...) enables fast, accessible completion. Use it.</li>
+<li>Related controls: <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>, <code>&lt;datalist&gt;</code> (suggestions), <code>&lt;output&gt;</code> (computed result), <code>&lt;progress&gt;</code>, <code>&lt;meter&gt;</code>.</li>
+</ul>
+
+<h2>7. Built-in constraint validation</h2>
+<p>When the user submits, the browser checks each control's constraints. If any fail, submission is cancelled, the first bad control gets focus and an error bubble. No JavaScript needed.</p>
+<table class="t"><tr><th>Attribute</th><th>Checks</th><th><code>validity</code> flag</th></tr>
+<tr><td><code>required</code></td><td>A value exists</td><td><code>valueMissing</code></td></tr>
+<tr><td><code>type</code> (email, url, number, date...)</td><td>Format</td><td><code>typeMismatch</code>, <code>badInput</code></td></tr>
+<tr><td><code>pattern</code></td><td>Regular expression that must match the <b>whole</b> value (add a <code>title</code> to explain it)</td><td><code>patternMismatch</code></td></tr>
+<tr><td><code>min</code>, <code>max</code></td><td>Numbers, dates, times in range</td><td><code>rangeUnderflow</code>, <code>rangeOverflow</code></td></tr>
+<tr><td><code>step</code></td><td>Increments (default 1)</td><td><code>stepMismatch</code></td></tr>
+<tr><td><code>minlength</code>, <code>maxlength</code></td><td>Text length</td><td><code>tooShort</code>, <code>tooLong</code></td></tr></table>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">RPMMSLT: validation attributes</b><b>R</b>eally <b>P</b>ink <b>M</b>onkeys <b>M</b>ake <b>S</b>ticky <b>L</b>emon <b>T</b>ea = <code>required</code>, <code>pattern</code>, <code>min</code>, <code>max</code>, <code>step</code>, <code>length</code>, <code>type</code>.</aside>
+<ul>
+<li>An empty, non-required field never fails <code>pattern</code>. An empty required one reports <code>valueMissing</code> instead.</li>
+<li><code>type="email"</code> accepts <code>a@b</code>, so add <code>pattern</code> if you need a dot.</li>
+<li><code>maxlength</code> stops typing at the limit, which can feel hostile. A visible counter (an <code>&lt;output&gt;</code>) with a softer rule is often kinder.</li>
+<li>CSS reacts live: <code>:required</code>, <code>:optional</code>, <code>:valid</code>, <code>:invalid</code>, <code>:in-range</code>, <code>:out-of-range</code>, <code>:read-only</code>, <code>:read-write</code>, <code>:disabled</code>, <code>:enabled</code>, <code>:default</code>. <code>:user-invalid</code> and <code>:user-valid</code> wait until the user has interacted, so you can avoid shouting errors at an untouched form.</li>
+<li><code>novalidate</code> (form) or <code>formnovalidate</code> (button) skips the check.</li>
+<li>JavaScript hooks: <code>form.checkValidity()</code>, <code>form.reportValidity()</code>, <code>input.setCustomValidity("msg")</code> (a method on the control, not on <code>validity</code>). A custom message blocks submission until you reset it with <code>setCustomValidity("")</code>.</li>
+</ul>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Client-side validation only</b>HTML validation is a convenience. Anyone can bypass it with dev tools or a script. <b>Always validate again on the server.</b></aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Disabled-looking submit</b><code>form:invalid [type=submit]{pointer-events:none}</code> removes the user's chance to see error messages. Leave the button live and let validation explain.</aside>
+<aside class="sticky hack r"><span class="tag">⚡ Pro hack</span><b class="t">Required without a bubble</b>Add <code>novalidate</code> to the form, then check <code>form.checkValidity()</code> in your own submit handler, showing styled error text linked with <code>aria-describedby</code>. You get custom UX and keep the constraint attributes.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Form to object in one line</b><code>Object.fromEntries(new FormData(form))</code> gives <code>{name:"HAL", ...}</code>. And use <code>form.requestSubmit()</code> to submit from script: unlike <code>form.submit()</code> it runs validation and fires the <code>submit</code> event.</aside>
+<textarea class="try-src" data-title="Form validation lab: constraints, :invalid, reportValidity" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px} label{display:block;margin:8px 0 2px;font-weight:600}
+ input,select{padding:6px;font:inherit} input:user-invalid{outline:2px solid #c00}
+ fieldset{margin-top:10px} pre{background:#eee;padding:6px}
+&lt;/style&gt;
+&lt;form id="f" aria-label="Workshop registration" method="get"&gt;
+  &lt;label for="n"&gt;Name&lt;/label&gt;
+  &lt;input id="n" name="name" required minlength="2" autocomplete="name"&gt;
+  &lt;label for="e"&gt;Email&lt;/label&gt;
+  &lt;input id="e" name="email" type="email" required pattern=".+@.+\..+" title="An address like you@example.com"&gt;
+  &lt;label for="a"&gt;Age (18 to 99, step 1)&lt;/label&gt;
+  &lt;input id="a" name="age" type="number" min="18" max="99" step="1"&gt;
+  &lt;fieldset&gt;&lt;legend&gt;Track (required)&lt;/legend&gt;
+    &lt;label&gt;&lt;input type="radio" name="track" value="ml" required&gt; Machine learning&lt;/label&gt;
+    &lt;label&gt;&lt;input type="radio" name="track" value="ops"&gt; Dishwasher ops&lt;/label&gt;
+  &lt;/fieldset&gt;
+  &lt;p&gt;&lt;button type="submit"&gt;Enrol&lt;/button&gt;
+     &lt;button type="submit" formnovalidate name="draft" value="1"&gt;Save draft (no validation)&lt;/button&gt;&lt;/p&gt;
+&lt;/form&gt;
+&lt;pre id="out"&gt;Click a button to see the data that would be sent.&lt;/pre&gt;
+&lt;script&gt;
+ /* This preview runs in a sandbox that blocks real form submission, so we
+    intercept the click, run the browser's own validation, then show the data. */
+ var f = document.getElementById('f'), out = document.getElementById('out');
+ f.addEventListener('click', function(e){
+   var btn = e.target.closest('button[type=submit]'); if (!btn) return;
+   e.preventDefault();
+   if (!btn.formNoValidate &amp;&amp; !f.reportValidity()) {
+     out.textContent = 'Blocked by validation. First invalid control: ' + f.querySelector(':invalid').name;
+     return;
+   }
+   var d = new URLSearchParams(new FormData(f));
+   if (btn.name) d.append(btn.name, btn.value);
+   out.textContent = '?' + d.toString();
+ });
+&lt;/script&gt;</textarea>
+<div class="fix"><b>✎ Notes corrected:</b> the notes call <code>&lt;form&gt;</code> "a landmark": only a form with an accessible name is. <code>&lt;ul start="6"&gt;</code> should be <code>&lt;ol start="6"&gt;</code> (<code>start</code> belongs to <code>&lt;ol&gt;</code>). Step mismatch makes a control <code>:invalid</code> and sets <code>stepMismatch</code>, but <code>:out-of-range</code> only reflects <code>min</code>/<code>max</code>. <code>setCustomValidity()</code> is a method of the control, not of <code>ValidityState</code>. <code>:user-invalid</code>/<code>:user-valid</code> are now widely supported. <code>maxlength</code>/<code>minlength</code> errors apply to user-edited values only. Quote typos (<code>value="Submit Form'</code>, <code>name="name'</code>) fixed. Removed: MLW April-Fools story, keyboard screenshot captions, the "Prettier requires the slash" claim (a style choice, not a rule), CodePen iframes, Learn Forms/Accessibility plugs, the quiz.</div>
+
+<div class="practice" data-id="m12"></div>
+<div class="quiz" data-id="m12"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>

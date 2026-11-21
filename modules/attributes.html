@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self' about: data: blob:; worker-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#121212">
+<title>Attributes | Zane Learning Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Global and boolean attributes, data-*">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.webmanifest">
+<script src="../js/prefs.js"></script>
+<script src="../js/profile.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="../img/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png"><link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+</head>
+<body data-root="../" data-mod="m11">
+<header class="hero"><div class="in"><div class="kicker">Part 3 &middot; Module 11</div><h1>Attributes</h1><p>Global and boolean attributes, data-*</p></div></header>
+<main>
+<p>Attributes are space-separated names and name/value pairs in the <b>opening tag</b> that add information and behaviour to an element. Some are <b>global</b> (any element), some are shared by several elements, some belong to one element only.</p>
+<pre><code>&lt;a href="#register" target="_self"&gt;Registration&lt;/a&gt;
+&lt;!-- href and target are attributes; the closing tag never has any --&gt;</code></pre>
+
+<h2>1. Syntax and case</h2>
+<ul>
+<li>Every attribute needs a value, except <b>boolean</b> ones (and, to a degree, enumerated ones).</li>
+<li>A value containing a space or special characters <b>must</b> be quoted. Always quote: it is safer and easier to read.</li>
+<li>HTML is not case-sensitive, but some <b>values</b> are. Values defined by the spec (<code>type="Text"</code>) are case-insensitive. Strings you invent (<code>id</code>, <code>class</code>) are case-sensitive, in HTML, in CSS attribute selectors and in JavaScript.</li>
+</ul>
+<pre><code>&lt;input type="text"&gt;   &lt;input type="TEXT"&gt;   &lt;!-- same --&gt;
+&lt;div id="myId"&gt;       &lt;div id="MyID"&gt;       &lt;!-- different --&gt;</code></pre>
+
+<h2>2. Boolean attributes</h2>
+<p>If a boolean attribute is <b>present</b>, it is true. If absent, it is false. The value is irrelevant: even <code>disabled="false"</code> is still disabled.</p>
+<pre><code>&lt;input required&gt;
+&lt;input required=""&gt;
+&lt;input required="required"&gt;   &lt;!-- all three identical, all valid --&gt;</code></pre>
+<p>Examples: <code>autofocus</code>, <code>inert</code>, <code>checked</code>, <code>disabled</code>, <code>required</code>, <code>readonly</code>, <code>multiple</code>, <code>selected</code>, <code>reversed</code>, <code>allowfullscreen</code>, <code>default</code>, <code>loop</code>, <code>autoplay</code>, <code>controls</code>, <code>muted</code>. To turn one off, <b>remove</b> the attribute. Do not set it to "false".</p>
+<pre><code>el.removeAttribute("muted");    // off
+el.setAttribute("muted", "");   // on (setAttribute needs two arguments)
+el.toggleAttribute("muted");    // flip it</code></pre>
+<aside class="sticky acronym"><span class="tag">🧠 Remember it</span><b class="t">PIT: boolean rule</b><b>P</b>enguins <b>I</b>mitate <b>T</b>igers = <b>P</b>resent <b>I</b>s <b>T</b>rue. Absent is false. The value never matters.</aside>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">disabled="false"</b>It does <b>not</b> enable the control. The attribute is present, so it is true. Remove it, or set the DOM property <code>el.disabled = false</code>.</aside>
+<p>In XML languages such as SVG, every attribute needs a value, booleans included.</p>
+
+<h2>3. Enumerated attributes</h2>
+<p>Enumerated attributes accept a fixed list of keywords. They look like booleans but are not: <b>absent does not mean false</b>, and missing or invalid values fall back to a default that depends on the attribute.</p>
+<table class="t"><tr><th>Attribute</th><th>Values</th><th>Missing or invalid</th></tr>
+<tr><td><code>contenteditable</code></td><td><code>true</code>, <code>false</code>, <code>plaintext-only</code> (empty string = true)</td><td><code>inherit</code></td></tr>
+<tr><td><code>&lt;input type&gt;</code></td><td><code>text</code>, <code>email</code>, <code>number</code>...</td><td><code>text</code></td></tr>
+<tr><td><code>draggable</code>, <code>spellcheck</code></td><td><code>true</code>, <code>false</code></td><td>Depends on the element</td></tr>
+<tr><td><code>hidden</code></td><td>empty (hidden), <code>until-found</code></td><td>Not hidden when absent</td></tr></table>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Treating enumerated as boolean</b><code>contenteditable="contenteditable"</code> is <b>invalid</b>, so it falls back to <code>inherit</code> and the element is not editable. <code>contenteditable="false"</code> is a real value that switches editing off. Learn which attributes are which, and omit values when you can.</aside>
+
+<h2>4. Global attributes</h2>
+<p>More than 30 attributes work on any element, even in the <code>&lt;head&gt;</code>, though some do nothing there (<code>hidden</code> on <code>&lt;meta&gt;</code>). The important ones:</p>
+<table class="t"><tr><th>Attribute</th><th>Use</th></tr>
+<tr><td><code>id</code></td><td>Unique identifier (see below)</td></tr>
+<tr><td><code>class</code></td><td>Space-separated names for CSS and JS</td></tr>
+<tr><td><code>style</code></td><td>Inline CSS</td></tr>
+<tr><td><code>lang</code>, <code>dir</code></td><td>Language and text direction</td></tr>
+<tr><td><code>title</code></td><td>Advisory tooltip text (unreliable on touch and for assistive tech)</td></tr>
+<tr><td><code>tabindex</code></td><td>Focusability and tab order (see the Focus module)</td></tr>
+<tr><td><code>hidden</code>, <code>inert</code></td><td>Hide or deactivate content</td></tr>
+<tr><td><code>contenteditable</code></td><td>Makes content editable</td></tr>
+<tr><td><code>role</code>, <code>aria-*</code></td><td>Accessibility semantics</td></tr>
+<tr><td><code>data-*</code></td><td>Your own data</td></tr>
+<tr><td><code>popover</code>, <code>slot</code>, <code>autofocus</code>, <code>translate</code>, <code>nonce</code>, <code>accesskey</code></td><td>Specialised. Avoid <code>accesskey</code>: it clashes with assistive tech shortcuts</td></tr></table>
+
+<h3>id</h3>
+<ul>
+<li>Must be unique in the document, with no spaces. Start with a letter and use ASCII letters, digits, <code>_</code> and <code>-</code>. Pick a naming convention: ids are case-sensitive.</li>
+<li>Uses: link target (<code>href="#about"</code>), script hook, <code>&lt;label for&gt;</code>, ARIA references, a high-specificity CSS hook (<code>#about</code>, or <code>[id="about"]</code> for lower specificity).</li>
+<li>A duplicate id will not crash the page, but links, labels and scripts will pick the wrong element.</li>
+<li>The fragment after <code>#</code> is never sent to the server. <code>href="#"</code> or <code>href="#top"</code> scrolls to the top for free.</li>
+<li><code>document.getElementById("x")</code> or <code>querySelector("#x")</code>.</li>
+</ul>
+<p><code>&lt;label for="x"&gt;</code> matches <code>id="x"</code>. Clicking the label focuses the control. A control may have several labels, but one label serves exactly one control. Nesting the control inside the label (implicit label) needs no <code>for</code>/<code>id</code>. <code>aria-labelledby</code>, <code>aria-describedby</code>, <code>aria-details</code> and <code>aria-owns</code> take a space-separated list of ids; <code>aria-activedescendant</code> takes one. If a control has both a <code>&lt;label&gt;</code> and <code>aria-labelledby</code>, the ARIA name wins.</p>
+
+<h3>class and style</h3>
+<ul>
+<li><code>class</code> is only a hook for CSS and JS. Often unnecessary: good semantic structure lets you select by element, attribute and position. <code>getElementsByClassName()</code> returns a <b>live</b> list, <code>querySelectorAll()</code> a <b>static</b> one.</li>
+<li><code>style</code> holds declarations only (no at-rules, no keyframes, no pseudo-elements). It is legal but discouraged; use it for quick tests, then move the rule to a stylesheet.</li>
+</ul>
+
+<h3>tabindex and role</h3>
+<ul>
+<li><code>tabindex="0"</code>: focusable and in the natural tab order. <code>tabindex="-1"</code>: focusable by script or click, but not tabbable. <code>tabindex="1"</code> or more: jumps the queue, chaos, avoid.</li>
+<li><code>role</code> comes from ARIA. It tells assistive tech what a widget is, but never changes behaviour: <code>&lt;span role="button"&gt;</code> is not a button.</li>
+</ul>
+<aside class="sticky acronym r"><span class="tag">🧠 Remember it</span><b class="t">FTB: tabindex values</b><b>F</b>rogs <b>T</b>ap <b>B</b>anjos = <b>-1 F</b>ocusable, <b>0 T</b>abbable, positive <b>B</b>ad.</aside>
+
+<h3>contenteditable</h3>
+<p><code>contenteditable</code> makes any element editable, focusable and tabbable (like <code>tabindex="0"</code>). Read the current state with the property <code>el.isContentEditable</code>, not <code>el.contentEditable</code> (a string that is always truthy).</p>
+<textarea class="try-src" data-title="Live CSS editor + dataset" hidden>&lt;style&gt;
+ body{font-family:sans-serif;padding:8px}
+ style{display:block;white-space:pre;font:13px monospace;border:1px solid;padding:.6em;border-radius:8px}
+ blockquote{background:#fff3cd;padding:8px}
+&lt;/style&gt;
+&lt;style contenteditable&gt;
+blockquote { color: #A51C30; font-size: 18px }
+&lt;/style&gt;
+&lt;blockquote id="q" data-first-name="Blendan" data-year-graduated="2022" data-role="student"&gt;
+  HAL and EVE could teach a fan to blow hot air.
+&lt;/blockquote&gt;
+&lt;button id="b" type="button"&gt;Read data-* with dataset&lt;/button&gt; &lt;button id="t" type="button"&gt;Toggle hidden&lt;/button&gt;
+&lt;pre id="out"&gt;&lt;/pre&gt;
+&lt;script&gt;
+ var q = document.getElementById('q'), out = document.getElementById('out');
+ document.getElementById('b').onclick = function(){
+   var o = {}; for (var k in q.dataset) o[k] = q.dataset[k];
+   out.textContent = JSON.stringify(o, null, 1) + '\nfirstName via getAttribute: ' + q.getAttribute('data-first-name');
+ };
+ document.getElementById('t').onclick = function(){ q.toggleAttribute('hidden'); };
+&lt;/script&gt;</textarea>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">A CSS editor in HTML</b>A <code>&lt;style contenteditable&gt;</code> set to <code>display:block</code> becomes a live editor: edit the text and the page restyles instantly. Handy for demos and for testing a rule.</aside>
+
+<h2>5. Custom data attributes</h2>
+<ul>
+<li>Name: <code>data-</code> then at least one lowercase character, no colon (and no leading <code>xml</code>). <code>data-birthday</code> is valid. <code>birthday</code> and <code>data:birthday</code> are not.</li>
+<li>Safe from clashes with present and future attributes. Browsers never give them default behaviour.</li>
+<li>JavaScript: <code>el.dataset</code> is a <code>DOMStringMap</code>. <code>data-first-name</code> becomes <code>el.dataset.firstName</code> (kebab-case to camelCase). Values are always strings.</li>
+<li>CSS can match them: <code>[data-role="student"] { ... }</code>.</li>
+</ul>
+<aside class="sticky mistake r"><span class="tag">⚠ Common mistake</span><b class="t">Uppercase in data names</b>HTML lowercases attribute names, so <code>data-firstName</code> becomes <code>data-firstname</code> and <code>dataset.firstName</code> is <code>undefined</code>. Write <code>data-first-name</code>.</aside>
+<aside class="sticky hack"><span class="tag">⚡ Pro hack</span><b class="t">Counting with dataset</b><code>el.dataset.count = Number(el.dataset.count) + 1</code> updates the attribute too, and <code>[data-count="3"]</code> in CSS reacts to it.</aside>
+<aside class="sticky fail r"><span class="tag">☠ Major fail point</span><b class="t">Inventing plain attributes</b><code>&lt;div status="open"&gt;</code> is invalid. Browsers tolerate it, but a future standard may give <code>status</code> a meaning and break your page. Always prefix with <code>data-</code>.</aside>
+<aside class="sticky fail"><span class="tag">☠ Major fail point</span><b class="t">Duplicate ids</b>Copy-pasting a component twice gives two <code>id="email"</code> inputs. The second label focuses the first input, and <code>getElementById</code> returns the first one only. Ids are unique per document.</aside>
+<div class="fix"><b>✎ Notes corrected:</b> the notes say <code>required="required"</code> "is not a valid value": it <b>is</b> valid (a boolean attribute may be empty or equal its own name). <code>setAttribute("muted")</code> needs a second argument (<code>""</code>). The toggle example <code>if (editor.contentEditable)</code> is always true (the property is a string): use <code>isContentEditable</code>. The <code>role</code> attribute is defined by ARIA but is fully part of HTML's attribute model. "Custom properties" in the dataset passage means custom <i>data attributes</i>; <code>plaintext-only</code> and <code>hidden="until-found"</code> were missing; <code>autofocus</code> is a global boolean. Quote typos (<code>type="Text'"</code>, <code>dataset["machineLearning']</code>, <code>e.dataset</code> for <code>el.dataset</code>) and OCR-looking <code>getElementByld</code> fixed. Removed: CodePen iframes, MLW light-switch easter egg, share-action custom element, site-specific quiz.</div>
+
+<div class="practice" data-id="m11"></div>
+<div class="quiz" data-id="m11"></div>
+<div class="pn"></div>
+</main>
+<script src="../data/modules.js"></script><script src="../data/quizzes.js"></script><script src="../data/challenges.js"></script><script src="../js/app.js"></script><script src="../js/practice.js"></script><script src="../js/reach.js"></script><script src="../js/palette.js"></script>
+</body>
+</html>
